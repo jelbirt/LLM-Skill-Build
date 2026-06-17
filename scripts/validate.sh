@@ -120,6 +120,19 @@ validate_skill() {
     [ "$desc_ok" -eq 1 ] && _ok "description ok (${#desc}/$MAX_DESC chars)"
   fi
 
+  # 3b. recognized frontmatter keys (Claude Code rejects unknown keys -> skill hidden from / menu)
+  local cc_keys=" name description when_to_use argument-hint arguments disable-model-invocation user-invocable allowed-tools disallowed-tools model effort context agent hooks paths shell "
+  local bad_keys=""
+  while IFS= read -r k; do
+    [ -n "$k" ] || continue
+    case "$cc_keys" in *" $k "*) ;; *) bad_keys="$bad_keys $k" ;; esac
+  done < <(printf '%s\n' "$fm" | sed -n 's/^\([A-Za-z][A-Za-z0-9_-]*\):.*$/\1/p')
+  if [ -n "$bad_keys" ]; then
+    _err "unrecognized frontmatter key(s):$bad_keys — Claude Code accepts only its documented keys and will hide the skill from the / menu (put 'license' in the repo LICENSE file, not frontmatter)"
+  else
+    _ok "frontmatter keys recognized"
+  fi
+
   # 4. body length
   if [ "$body_lines" -ge "$MAX_BODY_LINES" ]; then
     _err "body is $body_lines lines (keep under $MAX_BODY_LINES; move detail to references/)"

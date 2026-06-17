@@ -13,11 +13,11 @@ How skills in this repo are written. Kept short on purpose.
 Required (portable Agent Skills standard):
 
 - `name` — **must match the folder name**. Max 64 chars, lowercase letters / numbers / hyphens, no leading/trailing/consecutive hyphens. Must **not** contain the reserved words `anthropic` or `claude`, or XML tags (a claude.ai/API rule).
-- `description` — **max 1024 chars**, non-empty. What it does + when to use it. Must **not** contain XML tags (angle-bracket content) — use `[brackets]` or quotes for placeholders.
+- `description` — **max 1024 chars**, non-empty. What it does + when to use it. Must **not** contain XML tags (angle-bracket content) — use `[brackets]` or quotes for placeholders. Avoid a literal `: ` (colon-space) in an unquoted value; it can break YAML parsing.
 
-We also set:
+Do **not** put `license` in frontmatter (or other portable-only keys like `metadata` / `compatibility`). Claude Code accepts only its own documented keys and will **silently hide the skill from the `/` menu** if it sees an unrecognized key. The repo's license lives in the top-level [`LICENSE`](LICENSE) file instead.
 
-- `license: Apache-2.0`
+Claude Code's accepted optional keys: `when_to_use`, `argument-hint`, `arguments`, `allowed-tools`, `disallowed-tools`, `disable-model-invocation`, `user-invocable`, `model`, `effort`, `context`, `agent`, `hooks`, `paths`, `shell`. The linter flags any key outside this set.
 
 ## Quality checklist
 
