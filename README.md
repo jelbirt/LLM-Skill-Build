@@ -1,8 +1,6 @@
-# claude-skills
+# LLM Skill Build
 
 A small, curated set of focused [Agent Skills](https://agentskills.io) for Claude Code and other skills-compatible agents. Each skill does **one clear job**, is dogfooded in real work before publishing, and follows the portable Agent Skills standard so it works across multiple agent tools.
-
-> Working title — repo name not yet final.
 
 ## Skills
 
@@ -30,7 +28,7 @@ Then invoke it with `/<skill-name>`, or just describe your task — Claude loads
 ## Repo layout
 
 ```
-claude-skills/
+LLM-Skill-Build/
 ├── CONVENTIONS.md      # how skills here are authored + quality checklist
 ├── IDEAS.md            # backlog of skill candidates
 ├── _template/          # canonical SKILL.md starter
