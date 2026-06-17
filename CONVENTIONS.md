@@ -19,6 +19,8 @@ Do **not** put `license` in frontmatter (or other portable-only keys like `metad
 
 Claude Code's accepted optional keys: `when_to_use`, `argument-hint`, `arguments`, `allowed-tools`, `disallowed-tools`, `disable-model-invocation`, `user-invocable`, `model`, `effort`, `context`, `agent`, `hooks`, `paths`, `shell`. The linter flags any key outside this set.
 
+**Tags in the body (hygiene, not a hard rule):** raw `<angle>` / XML-style tags are forbidden only in `name`/`description`. In the body they're allowed — conventional git notation like `git switch <branch>` is fine — but since the body is injected into an LLM context, prefer `{braces}` or backticks for placeholders where practical. The linter *warns* on body tags rather than failing.
+
 ## Quality checklist
 
 Before committing a skill, confirm:

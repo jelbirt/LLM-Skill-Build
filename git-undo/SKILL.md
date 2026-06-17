@@ -7,7 +7,7 @@ argument-hint: [describe-the-mistake]
 # git-undo
 
 Help the user safely undo a git mistake. Diagnose the real state first, then give
-the exact recovery commands — never guess, and never run a destructive command
+the exact recovery commands - never guess, and never run a destructive command
 without flagging it and snapshotting first.
 
 The user's description of the mistake (if any): $ARGUMENTS
@@ -19,13 +19,13 @@ Recovery depends entirely on the actual state. Establish it first.
 **If you can run git in the user's repo** (e.g. Claude Code), run these read-only
 commands and read the output before saying anything:
 
-- `git status` — staged/unstaged/untracked, current branch, ahead/behind
-- `git log --oneline -20` — recent commits
-- `git reflog -20` — the safety net: where HEAD has been (this is what makes most "lost" work recoverable)
+- `git status` - staged/unstaged/untracked, current branch, ahead/behind
+- `git log --oneline -20` - recent commits
+- `git reflog -20` - the safety net: where HEAD has been (this is what makes most "lost" work recoverable)
 
 **If you cannot access the repo** (e.g. the chat app's sandbox), ask the user to
 paste the output of `git status` and `git reflog`. Do not recommend commands until
-you have it — the wrong assumption here can cause real data loss.
+you have it - the wrong assumption here can cause real data loss.
 
 Also confirm the few facts that change the safe answer, if not already clear:
 
@@ -39,18 +39,18 @@ Map the diagnosis to one of these. Pick the safest command that fits.
 
 | Situation | Safe recovery | Reversible? |
 | :-------- | :------------ | :---------- |
-| Discard changes to a tracked file (not yet committed) | `git restore <file>` | No — uncommitted edits are lost |
-| Unstage a file (keep the edits) | `git restore --staged <file>` | Yes |
+| Discard changes to a tracked file (not yet committed) | `git restore {file}` | No - uncommitted edits are lost |
+| Unstage a file (keep the edits) | `git restore --staged {file}` | Yes |
 | Undo the last commit, keep changes staged | `git reset --soft HEAD~1` | Yes (commit is in reflog) |
 | Undo the last commit, keep changes unstaged | `git reset HEAD~1` (a.k.a. `--mixed`) | Yes (reflog) |
 | Fix the last commit's message / add a forgotten file | `git commit --amend` | Yes if not pushed (reflog) |
-| Discard the last commit **and** its changes | snapshot first, then `git reset --hard HEAD~1` | **Destructive** — see §3 |
-| Committed to the wrong branch (not pushed) | `git switch <correct-branch>` then cherry-pick or, on the wrong branch, `git reset --hard HEAD~1` after the commit is safely on the right branch | Mixed — snapshot first |
-| Undo a commit that was already **pushed/shared** | `git revert <sha>` (adds a new commit that reverses it — does not rewrite history) | Yes, and safe for shared branches |
-| Recover work after a bad `reset --hard`, rebase, or merge | find the good SHA in `git reflog`, then `git reset --hard <sha>` (or `git merge --ff-only <sha>`) | Recovers if within the reflog window |
+| Discard the last commit **and** its changes | snapshot first, then `git reset --hard HEAD~1` | **Destructive** - see step 3 |
+| Committed to the wrong branch (not pushed) | `git switch {correct-branch}` then cherry-pick or, on the wrong branch, `git reset --hard HEAD~1` after the commit is safely on the right branch | Mixed - snapshot first |
+| Undo a commit that was already **pushed/shared** | `git revert {sha}` (adds a new commit that reverses it - does not rewrite history) | Yes, and safe for shared branches |
+| Recover work after a bad `reset --hard`, rebase, or merge | find the good SHA in `git reflog`, then `git reset --hard {sha}` (or `git merge --ff-only {sha}`) | Recovers if within the reflog window |
 | Undo a merge that isn't pushed | `git reset --hard ORIG_HEAD` (snapshot first) | Recoverable via reflog |
-| Restore a deleted branch | find its tip SHA in `git reflog`, then `git branch <name> <sha>` | Yes |
-| Recover files removed by `git clean` / deleted untracked files | usually **not recoverable** via git — say so honestly; suggest editor local history / OS trash | Often no |
+| Restore a deleted branch | find its tip SHA in `git reflog`, then `git branch {name} {sha}` | Yes |
+| Recover files removed by `git clean` / deleted untracked files | usually **not recoverable** via git - say so honestly; suggest editor local history / OS trash | Often no |
 
 If the situation isn't in this table, reason from the diagnosis and the same
 safety rules below.
@@ -70,11 +70,11 @@ This is the part that protects the user from making the mistake worse.
 
 Give the user, in this order:
 
-1. **What happened** — one line naming the situation you diagnosed.
-2. **The fix** — the exact command(s), copy-pasteable, in order. Mark each reversible or destructive.
-3. **What each command does** — a short clause per command, so they learn, not just paste.
-4. **How to verify** — what `git status` / `git log` should show afterward.
-5. **The escape hatch** — if anything looks wrong, the snapshot branch or reflog SHA to return to.
+1. **What happened** - one line naming the situation you diagnosed.
+2. **The fix** - the exact command(s), copy-pasteable, in order. Mark each reversible or destructive.
+3. **What each command does** - a short clause per command, so they learn, not just paste.
+4. **How to verify** - what `git status` / `git log` should show afterward.
+5. **The escape hatch** - if anything looks wrong, the snapshot branch or reflog SHA to return to.
 
 Keep it calm and concrete. The user is likely stressed; precise, reassuring steps
 matter more than exhaustive theory.

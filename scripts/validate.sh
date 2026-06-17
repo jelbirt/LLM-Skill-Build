@@ -150,6 +150,18 @@ validate_skill() {
     _ok "no obvious secrets"
   fi
 
+  # 6. raw angle-bracket / XML-style tags in the body (advisory hygiene, not a blocker)
+  #    Required only in name/description (checked above). In bodies it is cleaner for
+  #    LLM-facing / cross-surface use to prefer {braces} or backticks, but conventional
+  #    git notation like `git switch <branch>` is legitimate -- so this only warns.
+  local tag_hits
+  tag_hits="$(grep -nE '<[A-Za-z/][^>]*>' "$skill" 2>/dev/null || true)"
+  if [ -n "$tag_hits" ]; then
+    _warn "raw <angle> tags in body (hygiene: prefer {braces} or backticks; not required, not a loading blocker):"; printf '%s\n' "$tag_hits" | sed 's/^/      /'
+  else
+    _ok "no raw angle-bracket tags"
+  fi
+
   [ "$fail" -eq 0 ] || total_fail=1
 }
 
