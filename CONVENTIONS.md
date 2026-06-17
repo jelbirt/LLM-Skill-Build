@@ -1,0 +1,49 @@
+# Authoring conventions
+
+How skills in this repo are written. Kept short on purpose.
+
+## Layout
+
+- One skill per folder. Folder name is **kebab-case** and becomes the `/command` name.
+- Only `SKILL.md` is required. Optional: `scripts/`, `references/`, `assets/`.
+- Start from [`_template/SKILL.md`](_template/SKILL.md) (or run `/new-skill`).
+
+## Frontmatter
+
+Required (portable Agent Skills standard):
+
+- `name` — **must match the folder name**. Max 64 chars, lowercase letters / numbers / hyphens, no leading/trailing/consecutive hyphens. Must **not** contain the reserved words `anthropic` or `claude`, or XML tags (a claude.ai/API rule).
+- `description` — **max 1024 chars**, non-empty. What it does + when to use it. Must **not** contain XML tags (angle-bracket content) — use `[brackets]` or quotes for placeholders.
+
+We also set:
+
+- `license: Apache-2.0`
+
+## Quality checklist
+
+Before committing a skill, confirm:
+
+- [ ] **One clear job.** If it does two things, split it.
+- [ ] **`name` matches the folder name** and contains no reserved words (`anthropic`/`claude`) or XML tags.
+- [ ] **Description leads with the key use case** and contains natural trigger phrases a user would actually type. Lean slightly *pushy* — skills under-trigger.
+- [ ] **Description ≤ 1024 characters.**
+- [ ] **Body < 500 lines** (ideally < ~5000 tokens). Long reference material lives in `references/` and is linked, not inlined.
+- [ ] **No secrets / keys / tokens.** This is public git — treat `SKILL.md` like source code.
+- [ ] **Dogfooded.** Used in real work at least once before publish.
+- [ ] **Validated.** `scripts/validate.sh <skill-folder>` passes.
+
+## Good vs. weak descriptions
+
+```
+# Weak — won't trigger
+description: Helps with PRs.
+
+# Good — what + when + trigger words
+description: Summarizes a pull request from its diff and comments. Use when
+  the user asks to review a PR, wants a PR summary, or asks what a PR changes.
+```
+
+## Two char limits — don't confuse them
+
+- **1024** — hard cap on the `description` field (portable standard). The lint enforces this.
+- **1536** — Claude Code's truncation of the *combined* `description` + `when_to_use` in the skill listing display. Configurable; not a field cap.
