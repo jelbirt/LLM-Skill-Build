@@ -8,6 +8,7 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 | :---- | :----------- | :------ |
 | [`new-skill`](new-skill/) | Interview + scaffold a new, conventions-following skill, then lint it. | `cp -r new-skill ~/.claude/skills/` |
 | [`git-undo`](git-undo/) | Diagnose a git mistake and walk you through safe recovery, flagging destructive steps. | `cp -r git-undo ~/.claude/skills/` |
+| [`sidebar`](sidebar/) | Answer a tangential side question by delegating it to a subagent, keeping the research out of your main context. | `cp -r sidebar ~/.claude/skills/` |
 
 <!-- As skills ship, add a row: | [`name`](name/) | one line | `cp -r name ~/.claude/skills/` | -->
 
