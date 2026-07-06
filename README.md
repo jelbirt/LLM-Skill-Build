@@ -10,6 +10,7 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 | [`git-undo`](git-undo/) | Diagnose a git mistake and walk you through safe recovery, flagging destructive steps. | `cp -r git-undo ~/.claude/skills/` |
 | [`sidebar`](sidebar/) | Answer a tangential side question by delegating it to a subagent, keeping the research out of your main context. | `cp -r sidebar ~/.claude/skills/` |
 | [`hone-skill`](hone-skill/) | Improve an existing skill — analyze it, apply targeted edits for a requested improvement, then re-lint and validate. | `cp -r hone-skill ~/.claude/skills/` |
+| [`next-steps`](next-steps/) | Recommend prioritized next steps for the project via a token-efficient Sonnet subagent that reviews repo state and the freshest roadmap docs. | `cp -r next-steps ~/.claude/skills/` |
 
 <!-- As skills ship, add a row: | [`name`](name/) | one line | `cp -r name ~/.claude/skills/` | -->
 
