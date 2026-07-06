@@ -1,6 +1,7 @@
 ---
 name: next-steps
 description: Figure out the logical next steps for the current project by delegating a token-efficient review to a Sonnet subagent that reads the repo state, git history, and the most recent plan/roadmap docs, then returns a prioritized short list. Use whenever the user asks "what's next", "what should I work on", "next steps", "where did we leave off", "what's left", "help me plan the next session", or seems unsure how to move the project forward — even if they don't say "next-steps" explicitly.
+model: sonnet
 argument-hint: [optional focus area, e.g. "testing" or "v2 features"]
 ---
 

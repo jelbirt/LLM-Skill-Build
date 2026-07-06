@@ -1,6 +1,7 @@
 ---
 name: hone-skill
 description: Improve an existing skill - locate its SKILL.md, analyze the current state, plan and apply targeted edits to achieve a requested improvement, then re-lint and validate. Pass the target skill's name plus what you want to improve. Use whenever the user wants to hone, refine, tweak, sharpen, fix, tighten, or upgrade an existing skill, says "hone-skill", "improve the X skill", "make the X skill better", "the X skill should also handle...", or "update the description/body of skill Y". Edits in place against the repo conventions and preserves the skill's single job rather than rewriting wholesale.
+model: sonnet
 argument-hint: [skill-name] [what to improve]
 ---
 

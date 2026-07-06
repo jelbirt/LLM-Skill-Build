@@ -1,6 +1,7 @@
 ---
 name: new-skill
 description: Scaffold a new Agent Skill - interview for intent, then create the folder and a conventions-following SKILL.md with valid, pre-filled frontmatter, and lint it. Use whenever the user wants to create, start, scaffold, or bootstrap a skill, says "new skill", "make a skill for it", "turn this into a skill", or is about to hand-write a SKILL.md. Prefer this over writing a SKILL.md from scratch so the name, description, and layout follow conventions. For heavy eval or benchmark-driven iteration, hand off to skill-creator instead.
+model: sonnet
 argument-hint: [skill-name]
 ---
 
