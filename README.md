@@ -11,6 +11,7 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 | [`sidebar`](sidebar/) | Answer a tangential side question by delegating it to a subagent, keeping the research out of your main context. | `cp -r sidebar ~/.claude/skills/` |
 | [`hone-skill`](hone-skill/) | Improve an existing skill — analyze it, apply targeted edits for a requested improvement, then re-lint and validate. | `cp -r hone-skill ~/.claude/skills/` |
 | [`next-steps`](next-steps/) | Recommend prioritized next steps for the project via a token-efficient Sonnet subagent that reviews repo state and the freshest roadmap docs. | `cp -r next-steps ~/.claude/skills/` |
+| [`flowchart`](flowchart/) | Generate a clean, readable flowchart for a codebase, feature, or process and render it inline in chat, delegating exploration to a subagent to stay token-efficient. | `cp -r flowchart ~/.claude/skills/` |
 
 <!-- As skills ship, add a row: | [`name`](name/) | one line | `cp -r name ~/.claude/skills/` | -->
 
