@@ -14,6 +14,10 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 
 <!-- As skills ship, add a row: | [`name`](name/) | one line | `cp -r name ~/.claude/skills/` | -->
 
+## Third-party pipeline (installed, not vendored)
+
+The 8-command development pipeline from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (`/spec` → `/plan` → `/build` → `/test` → `/review-gate` → `/code-simplify` → `/webperf` → `/ship`) is installed into `~/.claude/` by [`scripts/install-agent-skills.sh`](scripts/install-agent-skills.sh) — a pinned, reproducible recipe that applies this repo's small port modifications (documented in the script header). Upstream content is not vendored here; an imported skill enters this repo only once it's been personally customized, at which point it moves to a root-level folder and comes off the recipe's install list.
+
 ## Installing a skill
 
 Each skill is a self-contained folder. To install one:
