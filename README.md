@@ -9,6 +9,7 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 | [`new-skill`](new-skill/) | Interview + scaffold a new, conventions-following skill, then lint it. | `cp -r new-skill ~/.claude/skills/` |
 | [`git-undo`](git-undo/) | Diagnose a git mistake and walk you through safe recovery, flagging destructive steps. | `cp -r git-undo ~/.claude/skills/` |
 | [`prompt-engineer`](prompt-engineer/) | Design, diagnose, and refine prompts using a standalone structure-and-technique framework. | `cp -r prompt-engineer ~/.claude/skills/` |
+| [`release-notes`](release-notes/) | Generate release notes from git history since the last tag, grouped by conventional-commit type. | `cp -r release-notes ~/.claude/skills/` |
 | [`sidebar`](sidebar/) | Answer a tangential side question by delegating it to a subagent, keeping the research out of your main context. | `cp -r sidebar ~/.claude/skills/` |
 | [`hone-skill`](hone-skill/) | Improve an existing skill — analyze it, apply targeted edits for a requested improvement, then re-lint and validate. | `cp -r hone-skill ~/.claude/skills/` |
 | [`next-steps`](next-steps/) | Recommend prioritized next steps for the project via a token-efficient Sonnet subagent that reviews repo state and the freshest roadmap docs. | `cp -r next-steps ~/.claude/skills/` |
