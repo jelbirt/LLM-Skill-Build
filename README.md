@@ -11,6 +11,7 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 | [`prompt-engineer`](prompt-engineer/) | Design, diagnose, and refine prompts using a standalone structure-and-technique framework. | `cp -r prompt-engineer ~/.claude/skills/` |
 | [`release-notes`](release-notes/) | Generate release notes from git history since the last tag, grouped by conventional-commit type. | `cp -r release-notes ~/.claude/skills/` |
 | [`deps-audit`](deps-audit/) | Unified, prioritized dependency report across security, freshness, and unused packages. | `cp -r deps-audit ~/.claude/skills/` |
+| [`prune-test-suite`](prune-test-suite/) | Review a test suite for relevance against current source, prune stale tests, and add missing coverage. | `cp -r prune-test-suite ~/.claude/skills/` |
 | [`sidebar`](sidebar/) | Answer a tangential side question by delegating it to a subagent, keeping the research out of your main context. | `cp -r sidebar ~/.claude/skills/` |
 | [`hone-skill`](hone-skill/) | Improve an existing skill — analyze it, apply targeted edits for a requested improvement, then re-lint and validate. | `cp -r hone-skill ~/.claude/skills/` |
 | [`next-steps`](next-steps/) | Recommend prioritized next steps for the project via a token-efficient Sonnet subagent that reviews repo state and the freshest roadmap docs. | `cp -r next-steps ~/.claude/skills/` |
