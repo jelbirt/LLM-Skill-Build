@@ -1,6 +1,7 @@
 ---
 name: rename-to-match-folder
 description: One sentence on what this does, then when to use it with natural trigger phrases a user would actually say. Lead with the key use case. Lean slightly pushy - skills under-trigger. Max 1024 characters.
+model: sonnet
 ---
 
 # <Skill title>
