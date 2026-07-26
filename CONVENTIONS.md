@@ -26,6 +26,7 @@ Claude Code's accepted optional keys: `when_to_use`, `argument-hint`, `arguments
 - `kickoff` - the generated prompt drives an entire successor session, so its quality compounds downstream.
 - `commit` - the one-commit-vs-split call is a judgment on real diffs, not a mechanical grouping.
 - `repo-adopt` - writes executable bash with safety gates and a starter CLAUDE.md for a repo it has just met.
+- `math-research` - literature review, complexity bounds, and numerical-stability judgment; a cheaper tier is likelier to produce plausible recall than a traceable citation.
 
 **Tags in the body (hygiene, not a hard rule):** raw `<angle>` / XML-style tags are forbidden only in `name`/`description`. In the body they're allowed — conventional git notation like `git switch <branch>` is fine — but since the body is injected into an LLM context, prefer `{braces}` or backticks for placeholders where practical. The linter *warns* on body tags rather than failing.
 

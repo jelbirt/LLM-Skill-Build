@@ -19,7 +19,7 @@ The side question: $ARGUMENTS
 Choose by what the question needs, then dispatch with the Task tool:
 
 - **`Explore`** (default) — understanding *existing* code or infra: "how/where does X work", "what does this module do", "where is Y configured". Read-only, search-optimized, reads excerpts not whole files.
-- **`Plan`** — design or architecture questions about *planned* or *changing* work: "how would I structure X", "what's the right approach for Y", trade-offs.
+- **`Plan`** — design or architecture questions about *planned* or *changing* work: "how would I structure X", "what's the right approach for Y", trade-offs. For a *mathematical or algorithmic* method choice that needs literature citations rather than a judgment call, use `/math-research` instead.
 - **`general-purpose`** — cross-cutting or multi-step questions that need both searching and reasoning across several areas.
 
 When in doubt, use `Explore`. Spawn **one** subagent — do not fan out for a quick aside.
