@@ -22,6 +22,7 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 | [`handoff`](handoff/) | Emit a successor-session briefing from the current session — state left behind, promised-but-undone work, open gates, honest uncertainties. | `cp -r handoff ~/.claude/skills/` |
 | [`kickoff`](kickoff/) | Turn a short workstream description into a complete, copy-ready kickoff prompt for a fresh session, with machine-checkable acceptance checks. | `cp -r kickoff ~/.claude/skills/` |
 | [`worktree-cleanup`](worktree-cleanup/) | Sweep finished git worktrees — verify merged and clean, then remove the worktree, delete the branch, and prune. | `cp -r worktree-cleanup ~/.claude/skills/` |
+| [`digest`](digest/) | Cross-project status digest ordered by what needs your attention: what moved, what's waiting on you, what's drifting. Read-only. | `cp -r digest ~/.claude/skills/` |
 
 <!-- As skills ship, add a row: | [`name`](name/) | one line | `cp -r name ~/.claude/skills/` | -->
 
