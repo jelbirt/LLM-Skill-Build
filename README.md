@@ -20,6 +20,7 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 | [`audit-fix`](audit-fix/) | Implement `/audit` findings via parallel subagents with disjoint file scopes; bug fixes require a failing repro test first (Prove-It), and pipeline-sized findings are deferred rather than quick-fixed. | `cp -r audit-fix ~/.claude/skills/` |
 | [`commit`](commit/) | Commit pending changes with an auto-generated message in the repo's style, splitting across commits when the diff spans unrelated concerns. | `cp -r commit ~/.claude/skills/` |
 | [`handoff`](handoff/) | Emit a successor-session briefing from the current session — state left behind, promised-but-undone work, open gates, honest uncertainties. | `cp -r handoff ~/.claude/skills/` |
+| [`kickoff`](kickoff/) | Turn a short workstream description into a complete, copy-ready kickoff prompt for a fresh session, with machine-checkable acceptance checks. | `cp -r kickoff ~/.claude/skills/` |
 
 <!-- As skills ship, add a row: | [`name`](name/) | one line | `cp -r name ~/.claude/skills/` | -->
 
