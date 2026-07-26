@@ -8,10 +8,9 @@ argument-hint: [the method question, optionally naming the file or module]
 
 Answer a methodology question about a mathematical or algorithmic choice with a
 cited, tradeoff-explicit findings brief. Research-only - this skill never edits
-code, and the subagent is instructed not to. Note the limit of that guarantee:
-it is enforced by instruction, not mechanically, whenever the subagent has write
-tools. If a run must be incapable of writing, dispatch `Explore` or `Plan`, which
-have no edit tools at all - at the cost of a worse fit for open-ended research.
+code, and the subagent is instructed not to. Know the limit of that guarantee:
+it is enforced by instruction, not mechanically, whenever the subagent has
+write tools. Step 2 covers what to do when that is not good enough.
 
 The question: $ARGUMENTS
 
@@ -47,12 +46,13 @@ Use the Task tool with **`general-purpose`**, and spawn **one** - do not fan
 out. It is the type built for open-ended research across code and the web,
 which is this skill's whole job.
 
-Do not reach for `Plan` here. It has no edit tools, which is appealing, but its
-persona is scripted around designing an implementation plan and closing with a
-list of critical files - that fights the findings contract in step 4 and tends
-to produce a hybrid of the two. Use it only when a run must be mechanically
-incapable of writing, and then say explicitly in the dispatch that the step 4
-contract replaces its usual closing section.
+Do not substitute a read-only agent type to get a write guarantee. `Plan` is
+scoped to designing implementation plans and closes with a critical-files
+list; `Explore` is scoped to locating code, not analyzing it. Both would be
+working against their own instructions here, and the findings contract in step
+4 is what loses. Where a mechanical guarantee is genuinely required, define an
+agent whose `tools:` frontmatter grants read and web access only - a real
+restriction from a purpose-built persona, rather than a borrowed one.
 
 State in the dispatch:
 
