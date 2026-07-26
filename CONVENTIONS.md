@@ -22,6 +22,10 @@ Claude Code's accepted optional keys: `when_to_use`, `argument-hint`, `arguments
 **Model pin:** default new skills to `model: sonnet` to cut invocation cost, unless the skill's core job benefits from the main session's own model (often a stronger tier like Opus or Fable) - decide per skill, don't apply blindly. Confirmed exceptions and why:
 - `prune-test-suite` - exact logic/text comparison between tests and source; a cheaper tier risks missing subtle drift.
 - `audit`, `audit-fix` - in-depth, project-wide weakness analysis and remediation against broader project goals; this benefits from the stronger reasoning of whatever model is driving the main session.
+- `handoff` - reads the current session's own state and must be unflatteringly honest about what is unfinished; a cheaper tier is likelier to paper over the gaps that make a handoff worth writing.
+- `kickoff` - the generated prompt drives an entire successor session, so its quality compounds downstream.
+- `commit` - the one-commit-vs-split call is a judgment on real diffs, not a mechanical grouping.
+- `repo-adopt` - writes executable bash with safety gates and a starter CLAUDE.md for a repo it has just met.
 
 **Tags in the body (hygiene, not a hard rule):** raw `<angle>` / XML-style tags are forbidden only in `name`/`description`. In the body they're allowed — conventional git notation like `git switch <branch>` is fine — but since the body is injected into an LLM context, prefer `{braces}` or backticks for placeholders where practical. The linter *warns* on body tags rather than failing.
 
