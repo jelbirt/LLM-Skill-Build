@@ -33,6 +33,18 @@ Detect, and record what you find:
    anything two concurrent workstreams would corrupt by writing at once. If
    found, plan a "who holds the pen" warning in the worktree script's output
    and suggest a pen-registry line in the repo's todo or state doc.
+   **Check both directions across repos, not just across worktrees.** A cache
+   this repo owns may have *inbound* consumers — sibling repos whose own
+   gitignored directories are symlinks pointing into this checkout, or whose
+   scheduled jobs invoke this repo's CLI to write it. Conversely this repo's
+   shared directories may themselves be symlinks pointing *outward*. Resolve
+   the symlinks rather than trusting directory names, and scan sibling repos
+   for links landing here. A pen rule that says "one worktree at a time" is
+   actively wrong when the real co-holder is another repo, and a fresh
+   session adopting this repo cold has no way to know that. When you find
+   cross-repo coupling, name the other repo and what it does — reads, writes,
+   or runs a scheduled job — and ask which repo's state doc owns the pen
+   registry so it is recorded once rather than duplicated into drift.
 4. **Test/lint stack** — lockfiles and config (`pyproject.toml` plus
    `uv.lock`, `package.json`, `Cargo.toml`, ...) and the actual test and
    lint commands. Prefer what CLAUDE.md or the README document over
@@ -51,7 +63,10 @@ Generate, confirming the choices flagged in step 1:
   if it already exists; then wires this repo's specific state — symlink the
   shared directories, copy the secrets files, leave envs to be recreated. A
   header comment documents WHAT is wired and WHY, plus the shared-state pen
-  rule when step 1.3 found any. Use `set -euo pipefail`, set the executable
+  rule when step 1.3 found any — naming every co-holder it found, including
+  other repos and scheduled jobs, since a pen rule scoped to worktrees reads
+  as safe while the real conflict sits outside them. Use `set -euo pipefail`,
+  set the executable
   bit, and end by echoing the new path and the repo's test command as the
   next step.
 - **`scripts/rm-worktree.sh`** — the teardown mirror; usage
