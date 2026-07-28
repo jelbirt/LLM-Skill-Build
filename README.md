@@ -23,7 +23,7 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 | [`kickoff`](kickoff/) | Turn a short workstream description into a complete, copy-ready kickoff prompt for a fresh session, with machine-checkable acceptance checks. | `cp -r kickoff ~/.claude/skills/` |
 | [`worktree-cleanup`](worktree-cleanup/) | Sweep finished git worktrees — verify merged and clean, then remove the worktree, delete the branch, and prune. | `cp -r worktree-cleanup ~/.claude/skills/` |
 | [`digest`](digest/) | Cross-project status digest ordered by what needs your attention: what moved, what's waiting on you, what's drifting. Read-only. | `cp -r digest ~/.claude/skills/` |
-| [`repo-adopt`](repo-adopt/) | Scaffold a repo for parallel-workstream worktrees — tailored create/teardown scripts, a worktree-cleanup skill, and CI matched to its real test stack. | `cp -r repo-adopt ~/.claude/skills/` |
+| [`repo-adopt`](repo-adopt/) | Scaffold a repo for parallel-workstream worktrees — create/teardown scripts, a one-definition green bar, CI, and a commit guard that enforces it. Handles multi-project repos. | `cp -r repo-adopt ~/.claude/skills/` |
 | [`math-research`](math-research/) | Review a mathematical or algorithmic choice against the literature via a research-only subagent — cited findings, complexity bounds, stability analysis, tradeoffs. | `cp -r math-research ~/.claude/skills/` |
 
 <!-- As skills ship, add a row: | [`name`](name/) | one line | `cp -r name ~/.claude/skills/` | -->
