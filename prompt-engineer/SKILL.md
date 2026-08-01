@@ -1,7 +1,6 @@
 ---
 name: prompt-engineer
 description: Design, diagnose, or refine a prompt for Claude or another LLM using a standalone prompt-engineering framework - clarify the goal and audience, structure role, context, task, and format, apply techniques like few-shot examples and structured output, and diagnose why an existing prompt underperforms. Use whenever the user wants to write a system prompt, user prompt, tool description, or agent instructions from scratch, wants to fix a prompt that isn't working well, or asks for help crafting, refining, or optimizing a prompt for any LLM.
-model: sonnet
 argument-hint: [the prompt to write or fix, or a description of what you need]
 ---
 
@@ -25,12 +24,23 @@ already stated, ask:
 Skip this step only if the user already supplied enough of the above, or
 explicitly wants a quick draft to iterate on rather than a full interview.
 
-## 2. Pick the mode
+## 2. Gather context when the prompt targets something real
 
-- **Drafting a new prompt** - go to step 3.
-- **Fixing an existing prompt that underperforms** - go to step 4 first, then step 3 for the rewrite.
+A prompt aimed at a specific codebase, API, tool, or product surface should be
+grounded in that target, not written from recall:
 
-## 3. Structure the prompt
+- **Prompt for/about code in this project** (agent instructions, CLAUDE.md content, a tool description) - read the relevant files first so names, conventions, and constraints in the prompt match reality.
+- **Prompt that depends on current external facts** (a provider's API shapes, model-specific behaviors, a library's idioms) - verify with a web search or the docs rather than trusting recall; a confidently wrong detail baked into a prompt propagates to every run of it.
+
+Skip this step when the prompt is self-contained - pure style, tone, or
+reasoning instructions with no external referent.
+
+## 3. Pick the mode
+
+- **Drafting a new prompt** - go to step 4.
+- **Fixing an existing prompt that underperforms** - go to step 5 first, then step 4 for the rewrite.
+
+## 4. Structure the prompt
 
 A well-structured prompt separates these parts, even if the final text blends them:
 
@@ -47,7 +57,7 @@ Pick techniques based on the goal - state what to do rather than stacking all of
 - **Negative examples** - when a plausible-looking wrong answer is common; show it and say why it's wrong.
 - **Explain why, not just what** - rules the model understands the reasoning behind generalize better than rigid MUSTs; reserve hard imperatives for genuinely non-negotiable constraints.
 
-## 4. Diagnose a weak prompt
+## 5. Diagnose a weak prompt
 
 Check an underperforming prompt against these failure modes, roughly in order of impact:
 
@@ -61,14 +71,14 @@ Check an underperforming prompt against these failure modes, roughly in order of
 
 Point to the specific line or phrase causing each issue rather than giving generic feedback.
 
-## 5. Iterate
+## 6. Iterate
 
 After drafting or fixing a prompt:
 
 - Ask the user for one real example input it needs to handle, if they have one. Trace through the prompt against that example and flag anything that would produce the wrong output.
 - Prefer a small number of well-chosen examples and constraints over an exhaustive list - a prompt that tries to cover every edge case up front is harder to read and often self-contradicts.
 
-## 6. Return
+## 7. Return
 
 Give the user the prompt itself, clearly delimited in a fenced code block,
 followed by a short rationale only for the non-obvious choices - not a
