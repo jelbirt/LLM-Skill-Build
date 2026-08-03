@@ -19,7 +19,11 @@ Do **not** put `license` in frontmatter (or other portable-only keys like `metad
 
 Claude Code's accepted optional keys: `when_to_use`, `argument-hint`, `arguments`, `allowed-tools`, `disallowed-tools`, `disable-model-invocation`, `user-invocable`, `model`, `effort`, `context`, `agent`, `hooks`, `paths`, `shell`. The linter flags any key outside this set.
 
-**Model pin:** default new skills to `model: sonnet` to cut invocation cost, unless the skill's core job benefits from the main session's own model (often a stronger tier like Opus or Fable) - decide per skill, don't apply blindly. Confirmed exceptions and why:
+**Model pin:** default new skills to `model: sonnet` to cut invocation cost, unless the skill's core job benefits from the main session's own model (often a stronger tier like Opus or Fable) - decide per skill, don't apply blindly. The dividing line that keeps recurring: **does the skill check work against a known rubric, or judge semantics?** Matching a diff against a defined checklist (WCAG criteria, known perf anti-patterns, tool output) is cheap-tier work. Deciding whether something is *actually* a defect - reasoning across files, separating a real problem from a plausible-looking nitpick - is where tier shows, and it is worth paying for wherever a miss is not caught downstream.
+
+Prefer inherit over a hard pin to a strong tier (`model: opus`): a pin caps the skill at that tier even when the session runs on a stronger one. Pin down deliberately; never pin up.
+
+Confirmed exceptions to the sonnet default, and why:
 - `prune-test-suite` - exact logic/text comparison between tests and source; a cheaper tier risks missing subtle drift.
 - `audit`, `audit-fix` - in-depth, project-wide weakness analysis and remediation against broader project goals; this benefits from the stronger reasoning of whatever model is driving the main session.
 - `handoff` - reads the current session's own state and must be unflatteringly honest about what is unfinished; a cheaper tier is likelier to paper over the gaps that make a handoff worth writing.

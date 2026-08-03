@@ -25,9 +25,13 @@
 #   1. Strip the `agent-skills:` plugin-namespace prefix from command files so
 #      skill references resolve as plain ~/.claude/skills folders.
 #   2. Add `model: sonnet` to 3 mechanical skills (code-simplification,
-#      browser-testing-with-devtools, performance-optimization) and 2 personas
-#      (test-engineer, web-performance-auditor). Everything else inherits the
-#      session model — spec/plan/build/review quality compounds downstream.
+#      browser-testing-with-devtools, performance-optimization) and 1 persona
+#      (web-performance-auditor) — each works from a known rubric of
+#      anti-patterns rather than judging semantics from scratch, and each is
+#      scoped to a single diff with a mandated verify step. Everything else
+#      inherits the session model: spec/plan/build/review quality compounds
+#      downstream, and review is the last line of defense under the
+#      one-pass-per-diff policy, so a missed defect is not caught anywhere else.
 #   3. Rename command review.md -> review-gate.md (Claude Code's built-in
 #      /review shadows a user command of the same name).
 #   4. Bundle upstream's shared references/*.md checklists into each installed
@@ -64,7 +68,7 @@ SKILLS=(
 )
 SONNET_SKILLS=(code-simplification browser-testing-with-devtools performance-optimization)
 AGENTS=(security-auditor test-engineer web-performance-auditor)
-SONNET_AGENTS=(test-engineer web-performance-auditor)
+SONNET_AGENTS=(web-performance-auditor)
 
 claude_dir="${CLAUDE_DIR:-$HOME/.claude}"
 latest=0
