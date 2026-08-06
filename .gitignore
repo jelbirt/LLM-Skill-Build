@@ -1,0 +1,5 @@
+# Local Claude Code session state (permissions, settings) — never publish
+.claude/
+
+# Scratch clone target used by scripts/install-agent-skills.sh — upstream content is not vendored
+addy-agent-skills/

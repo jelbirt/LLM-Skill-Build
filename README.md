@@ -1,5 +1,7 @@
 # LLM Skill Build
 
+[![validate](https://github.com/jelbirt/LLM-Skill-Build/actions/workflows/validate.yml/badge.svg)](https://github.com/jelbirt/LLM-Skill-Build/actions/workflows/validate.yml)
+
 A small, curated set of focused [Agent Skills](https://agentskills.io) for Claude Code and other skills-compatible agents. Each skill does **one clear job**, is dogfooded in real work before publishing, and follows the portable Agent Skills standard so it works across multiple agent tools.
 
 ## Skills
@@ -45,6 +47,20 @@ cp -r <skill-name> .claude/skills/
 ```
 
 Then invoke it with `/<skill-name>`, or just describe your task — Claude loads the skill automatically when the description matches.
+
+## Example
+
+```text
+> /git-undo I committed to main but meant to put it on a feature branch
+
+Snapshot first (safe fallback): git branch backup/main-before-undo
+1. git branch feature/my-work    # keep your commit on a new branch
+2. git reset --hard HEAD~1       # move main back one commit (destructive — snapshot taken above)
+3. git switch feature/my-work    # continue where you left off
+Verify: git log --oneline -2 main feature/my-work
+```
+
+Each skill works this way: describe the situation, get state-aware steps with destructive operations flagged, or a finished artifact (scaffolded skill, digest, flowchart) where that's the skill's job.
 
 ## Repo layout
 
