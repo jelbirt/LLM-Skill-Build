@@ -27,6 +27,7 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 | [`digest`](digest/) | Cross-project status digest ordered by what needs your attention: what moved, what's waiting on you, what's drifting. Read-only. | `cp -r digest ~/.claude/skills/` |
 | [`repo-adopt`](repo-adopt/) | Scaffold a repo for parallel-workstream worktrees — create/teardown scripts, a one-definition green bar, CI, and a commit guard that enforces it. Handles multi-project repos. | `cp -r repo-adopt ~/.claude/skills/` |
 | [`math-research`](math-research/) | Review a mathematical or algorithmic choice against the literature via a research-only subagent — cited findings, complexity bounds, stability analysis, tradeoffs. | `cp -r math-research ~/.claude/skills/` |
+| [`sync-profile-readme`](sync-profile-readme/) | Regenerate a GitHub profile README's project table from your pinned repos — rewrites only the marked region, leaves hand-written rows alone, and never deletes a row. | `cp -r sync-profile-readme ~/.claude/skills/` |
 
 <!-- As skills ship, add a row: | [`name`](name/) | one line | `cp -r name ~/.claude/skills/` | -->
 
