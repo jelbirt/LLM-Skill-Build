@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Emit a successor-session briefing from the CURRENT session - exact state left behind, in-flight and promised-but-undone work, open owner gates, honest uncertainties, standing invariants, and orient-first instructions - in one fenced code block. Use whenever the user wants to wrap up, hand off, or continue in a fresh session, says "handoff", "write a handoff", "brief the next session", "I'm about to /clear", or asks what a successor needs to know, even if they don't say "handoff" explicitly.
+description: Emit a successor-session briefing from the CURRENT session - exact state left behind, in-flight and promised-but-undone work, open owner gates, honest uncertainties, standing invariants, and orient-first instructions - in one fenced code block. Use whenever the user wants to wrap up, hand off, or continue in a fresh session, says "handoff", "write a handoff", "brief the next session", "I'm about to /clear", or asks what a successor needs to know, even if they don't say "handoff" explicitly. The audience is a successor that starts empty - use session-report instead when reporting back into a session that is still running and already has the project in context.
 ---
 
 # handoff

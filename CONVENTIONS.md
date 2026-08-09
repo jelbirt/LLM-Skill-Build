@@ -32,6 +32,7 @@ Confirmed exceptions to the sonnet default, and why:
 - `repo-adopt` - writes executable bash with safety gates and a starter CLAUDE.md for a repo it has just met.
 - `math-research` - literature review, complexity bounds, and numerical-stability judgment; a cheaper tier is likelier to produce plausible recall than a traceable citation.
 - `prompt-engineer` - the output is itself a prompt that drives another session, agent, or product surface, so its quality compounds downstream (same reasoning as `kickoff`); grounding research done mid-skill should also run at the session's own tier.
+- `session-report` - same reasoning as `handoff`, one step sharper: the report is merged into a session that will act on it, so an unverified claim presented as a finished one gets acted on. Separating "verified" from "believed" is judgment, not transcription.
 
 **Tags in the body (hygiene, not a hard rule):** raw `<angle>` / XML-style tags are forbidden only in `name`/`description`. In the body they're allowed — conventional git notation like `git switch <branch>` is fine — but since the body is injected into an LLM context, prefer `{braces}` or backticks for placeholders where practical. The linter *warns* on body tags rather than failing.
 
