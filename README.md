@@ -29,6 +29,7 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 | [`math-research`](math-research/) | Review a mathematical or algorithmic choice against the literature via a research-only subagent — cited findings, complexity bounds, stability analysis, tradeoffs. | `cp -r math-research ~/.claude/skills/` |
 | [`sync-profile-readme`](sync-profile-readme/) | Regenerate a GitHub profile README's project table from your pinned repos — rewrites only the marked region, leaves hand-written rows alone, and never deletes a row. | `cp -r sync-profile-readme ~/.claude/skills/` |
 | [`session-report`](session-report/) | Report this session's status up to the main session that delegated it — scope, what landed, what changed on disk, verification evidence, what's outstanding. | `cp -r session-report ~/.claude/skills/` |
+| [`scaffold-audit`](scaffold-audit/) | Periodic re-audit of your entire Claude Code config — full inventory (skills, commands, agents, hooks, permissions, pins), decay triage, ground-truth A/B bake-offs, verified prune with git rollback. Makes the periodic delete-your-scaffolding ritual urged by Boris Cherny repeatable and evidence-based. | `cp -r scaffold-audit ~/.claude/skills/` |
 
 <!-- As skills ship, add a row: | [`name`](name/) | one line | `cp -r name ~/.claude/skills/` | -->
 
