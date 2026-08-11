@@ -43,8 +43,9 @@
 #   3. Rename command review.md -> review-gate.md (Claude Code's built-in
 #      /review shadows a user command of the same name).
 #   4. Bundle upstream's shared references/*.md checklists into each installed
-#      skill folder that cites them, so `references/...` mentions resolve
-#      relative to the skill directory.
+#      skill folder — only the files that skill's SKILL.md actually cites —
+#      so `references/...` mentions resolve relative to the skill directory
+#      without tripling the footprint with never-loaded copies.
 #   5. Rewrite references to the six retired skills (see above), plus
 #      upstream's dangling `context-engineering` reference, wherever they
 #      remain — the commands, the three installed skills that cite them, the
@@ -161,10 +162,27 @@ mkdir -p "$claude_dir/skills" "$claude_dir/commands" "$claude_dir/agents"
 for s in "${SKILLS[@]}"; do
   rm -rf "$claude_dir/skills/$s"
   cp -r "$src/skills/$s" "$claude_dir/skills/$s"
-  # Mod 4: bundle shared reference checklists where cited.
-  if grep -q 'references/' "$claude_dir/skills/$s/SKILL.md"; then
+  # Mod 4: bundle shared reference checklists — only the files this skill's
+  # SKILL.md actually cites (the full 7-file bundle per skill tripled the
+  # installed footprint with never-loaded copies; the files don't cross-cite).
+  cited="$(grep -oE 'references/[a-z-]+\.md' "$claude_dir/skills/$s/SKILL.md" | sort -u || [ $? -eq 1 ])"
+  if [ -n "$cited" ]; then
     mkdir -p "$claude_dir/skills/$s/references"
-    cp "$src"/references/*.md "$claude_dir/skills/$s/references/"
+    for r in $cited; do
+      cp "$src/references/$(basename "$r")" "$claude_dir/skills/$s/references/"
+    done
+  fi
+  # Guard: every references/ mention anywhere in the installed skill (SKILL.md,
+  # sibling docs, and the copied references themselves) must resolve on disk.
+  # Deliberately wider charset than the extraction regex above, so a drifted
+  # filename is caught here instead of silently skipped.
+  unresolved=""
+  while IFS= read -r m; do
+    [ -f "$claude_dir/skills/$s/$m" ] || unresolved="$unresolved $m"
+  done < <(grep -rhoE 'references/[A-Za-z0-9_-]+\.md' "$claude_dir/skills/$s" | sort -u)
+  if [ -n "$unresolved" ]; then
+    echo "ERROR: skill $s cites unresolved reference files:$unresolved (upstream drift?)" >&2
+    exit 1
   fi
   echo "  skill   $s"
 done
