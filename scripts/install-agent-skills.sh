@@ -6,14 +6,19 @@
 # Upstream:  https://github.com/addyosmani/agent-skills  (MIT)
 # Pinned at: 70b7506ce90e200cb47645ddb3f6b8e84fecc047  (vendored 2026-07-07)
 #
-# Installs (25 files):
-#   - 14 skills  -> ~/.claude/skills/     (Define: interview-me, idea-refine,
+# Installs (22 files):
+#   - 11 skills  -> ~/.claude/skills/     (Define: interview-me, idea-refine,
 #     spec-driven-development · Plan: planning-and-task-breakdown · Build:
-#     incremental-implementation, test-driven-development,
-#     debugging-and-error-recovery, doubt-driven-development · Verify:
-#     browser-testing-with-devtools · Review: code-review-and-quality,
-#     security-and-hardening, performance-optimization, code-simplification ·
-#     Ship: shipping-and-launch)
+#     incremental-implementation, doubt-driven-development · Verify:
+#     browser-testing-with-devtools · Review: security-and-hardening,
+#     performance-optimization, code-simplification · Ship: shipping-and-launch)
+#
+#     test-driven-development, debugging-and-error-recovery, and
+#     code-review-and-quality are deliberately NOT installed (removed
+#     2026-08-10): A/B bake-offs against the bare model showed identical
+#     outcomes on ground-truth fixtures — current models do these natively —
+#     while security-and-hardening measurably earned its keep in the same
+#     trial. Mod 5 rewrites the remaining upstream references to them.
 #   - 8 commands -> ~/.claude/commands/   (/spec /plan /build /test
 #     /review-gate /code-simplify /webperf /ship)
 #   - 3 personas -> ~/.claude/agents/     (security-auditor, test-engineer,
@@ -37,8 +42,11 @@
 #   4. Bundle upstream's shared references/*.md checklists into each installed
 #      skill folder that cites them, so `references/...` mentions resolve
 #      relative to the skill directory.
+#   5. Rewrite references to the three removed skills (see above) in the
+#      commands, the two skills that cite them, and the shared reference
+#      checklists, so nothing points at a skill that is no longer installed.
 #
-# NOTE: re-running OVERWRITES the 25 installed files. Never hand-edit the
+# NOTE: re-running OVERWRITES the 22 installed files. Never hand-edit the
 # installed copies — to customize an imported skill, graduate it into this
 # repo as your own folder, remove it from the lists below, and install it
 # with scripts/install.sh instead.
@@ -59,10 +67,9 @@ PIN="70b7506ce90e200cb47645ddb3f6b8e84fecc047"
 SKILLS=(
   interview-me idea-refine spec-driven-development
   planning-and-task-breakdown
-  incremental-implementation test-driven-development
-  debugging-and-error-recovery doubt-driven-development
+  incremental-implementation doubt-driven-development
   browser-testing-with-devtools
-  code-review-and-quality security-and-hardening
+  security-and-hardening
   performance-optimization code-simplification
   shipping-and-launch
 )
@@ -102,6 +109,36 @@ for a in "${SONNET_AGENTS[@]}"; do pin_sonnet "$src/agents/$a.md"; done
 
 # Mod 3: /review is shadowed by Claude Code's built-in — install as /review-gate.
 mv "$src/.claude/commands/review.md" "$src/.claude/commands/review-gate.md"
+
+# Mod 5: rewrite references to the three removed skills (test-driven-development,
+# debugging-and-error-recovery, code-review-and-quality) so nothing installed
+# points at a skill that no longer exists. The command bodies are already
+# self-contained workflows; these edits drop the invocation pointers and inline
+# the one piece of guidance that would otherwise be lost.
+sed -i '/^Invoke the test-driven-development skill\.$/{N;d;}' "$src/.claude/commands/test.md"
+sed -i 's|Invoke the incremental-implementation skill alongside test-driven-development\.|Invoke the incremental-implementation skill.|' "$src/.claude/commands/build.md"
+sed -i "s|a test can't be made to pass or the build breaks without an obvious fix → follow debugging-and-error-recovery|a test can't be made to pass or the build breaks without an obvious fix → stop and debug to the root cause; never patch symptoms to keep moving|" "$src/.claude/commands/build.md"
+sed -i 's|If any step fails, follow the debugging-and-error-recovery skill\.|If any step fails, stop and debug to the root cause before continuing — reproduce the failure, isolate the cause, fix, and re-verify.|' "$src/.claude/commands/build.md"
+sed -i '/^Invoke the code-review-and-quality skill\.$/{N;d;}' "$src/.claude/commands/review-gate.md"
+sed -i 's|Use `code-review-and-quality` to review the result\.|Review the result with the code-reviewer agent.|' "$src/.claude/commands/code-simplify.md"
+sed -i 's|- \*\*`code-review-and-quality` / `/review`\*\*: complementary\.|- **`/review-gate` / `/review`**: complementary.|' "$src/skills/doubt-driven-development/SKILL.md"
+sed -i "s|- \*\*\`test-driven-development\`\*\*: TDD's RED step|- **TDD (\`/test\`)**: TDD's RED step|" "$src/skills/doubt-driven-development/SKILL.md"
+sed -i 's|- \*\*`debugging-and-error-recovery`\*\*: when the reviewer surfaces a real failure mode, drop into the debugging skill to localize and fix\.|- **Debugging**: when the reviewer surfaces a real failure mode, reproduce it, localize the root cause, and fix before proceeding.|' "$src/skills/doubt-driven-development/SKILL.md"
+sed -i 's|following `skills/incremental-implementation/SKILL.md` (`incremental-implementation`) and `skills/test-driven-development/SKILL.md` (`test-driven-development`)\.|following `skills/incremental-implementation/SKILL.md` (`incremental-implementation`), writing tests ahead of implementation (`/test`).|' "$src/skills/spec-driven-development/SKILL.md"
+sed -i 's|The depth behind these items lives in `code-review-and-quality` (the five-axis review) and|The depth behind these items lives in the five-axis review (`/review-gate`) and|' "$src/references/definition-of-done.md"
+sed -i 's|/review → code-reviewer (with code-review-and-quality skill) → report|/review → code-reviewer agent → report|' "$src/references/orchestration-patterns.md"
+sed -i 's|Use alongside the `test-driven-development` skill\.|Use when writing tests ahead of implementation.|' "$src/references/testing-patterns.md"
+
+# Guard: Mod 5's seds exit 0 even when nothing matches, so upstream drift
+# (--latest, or a future pin bump) could silently reintroduce dangling
+# references. Fail hard instead.
+dangling="$(grep -rlE 'test-driven-development|debugging-and-error-recovery|code-review-and-quality' \
+  "$src/.claude/commands" "$src/references" "${SKILLS[@]/#/$src/skills/}" || true)"
+if [ -n "$dangling" ]; then
+  echo "ERROR: dangling references to removed skills survived Mod 5 (upstream drift?):" >&2
+  echo "$dangling" >&2
+  exit 1
+fi
 
 # Install.
 mkdir -p "$claude_dir/skills" "$claude_dir/commands" "$claude_dir/agents"
