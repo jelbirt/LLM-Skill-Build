@@ -32,14 +32,15 @@
 # Port modifications applied to the upstream files before install:
 #   1. Strip the `agent-skills:` plugin-namespace prefix from command files so
 #      skill references resolve as plain ~/.claude/skills folders.
-#   2. Add `model: sonnet` to 2 mechanical skills (code-simplification,
-#      browser-testing-with-devtools) and 1 persona
-#      (web-performance-auditor) — each works from a known rubric of
-#      anti-patterns rather than judging semantics from scratch, and each is
-#      scoped to a single diff with a mandated verify step. Everything else
-#      inherits the session model: spec/plan/build/review quality compounds
-#      downstream, and review is the last line of defense under the
-#      one-pass-per-diff policy, so a missed defect is not caught anywhere else.
+#   2. Add `model: sonnet` to 1 mechanical skill (browser-testing-with-devtools)
+#      and 1 persona (web-performance-auditor) — each works from a known rubric
+#      of anti-patterns rather than judging semantics from scratch, with a
+#      mandated verify step. Everything else inherits the session model:
+#      code-simplification was unpinned in the 2026-08 tier-4 sweep
+#      (behavior-preserving refactors are correctness-critical), and
+#      spec/build/review quality compounds downstream — review is the last
+#      line of defense under the one-pass-per-diff policy, so a missed defect
+#      is not caught anywhere else.
 #   3. Rename command review.md -> review-gate.md (Claude Code's built-in
 #      /review shadows a user command of the same name).
 #   4. Bundle upstream's shared references/*.md checklists into each installed
@@ -77,7 +78,7 @@ SKILLS=(
   security-and-hardening code-simplification
   shipping-and-launch
 )
-SONNET_SKILLS=(code-simplification browser-testing-with-devtools)
+SONNET_SKILLS=(browser-testing-with-devtools)
 AGENTS=(test-engineer web-performance-auditor)
 SONNET_AGENTS=(web-performance-auditor)
 

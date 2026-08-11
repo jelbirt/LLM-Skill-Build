@@ -1,7 +1,6 @@
 ---
 name: git-undo
 description: Diagnose a git mistake and return the safe steps to undo it - the exact commands, what each does, what is reversible, and how to verify. Use whenever the user wants to undo, revert, roll back, or recover something in git, such as an accidental or wrong commit, committing to the wrong branch, an unwanted reset --hard, a bad merge or rebase, a force-push that lost work, a deleted branch, unstaging files, or "I think I lost a commit." Prefer this over ad-hoc git advice so recovery is state-aware and destructive steps are flagged and snapshotted first. If the repo is not directly accessible, ask the user to paste their git status and git reflog output.
-model: sonnet
 argument-hint: [describe-the-mistake]
 ---
 

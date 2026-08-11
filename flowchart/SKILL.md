@@ -1,7 +1,6 @@
 ---
 name: flowchart
 description: Generates a clean, readable flowchart of a codebase, feature, component, process, or entire project and renders it inline in the chat window. Accepts an optional argument describing the scope (e.g. "the auth flow", "the entire repo architecture", "how requests move through the API layer") plus any other specs like orientation or detail level. Use whenever the user asks for a flowchart, flow diagram, architecture diagram, process diagram, or wants to visualize how a feature/component/system/process works - e.g. "diagram this", "flowchart the X flow", "show me how X works visually", "draw the architecture", or "/flowchart". Delegates codebase exploration to a subagent and renders via the visualize tool to keep token usage low.
-model: sonnet
 argument-hint: [optional scope, e.g. "the auth flow" or "entire repo"]
 ---
 

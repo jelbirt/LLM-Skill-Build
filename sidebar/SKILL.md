@@ -1,7 +1,6 @@
 ---
 name: sidebar
 description: Answer a tangential side question without bloating the main session - delegate it to a subagent that researches it in its own context (the repo first, reaching out to the web only when the answer isn't in the project) and returns only a tight, cited answer. Use whenever the user asks a side/aside question mid-session, says "sidebar", "side question", "quick aside", "while we're here", "remind me how X works", or wants to look something up about the project's architecture, design, or existing/planned code or infra without spending main-chat context. Prefer this over answering inline so the heavy file-reading stays in the subagent and only the distilled answer returns.
-model: sonnet
 argument-hint: [your-side-question]
 ---
 

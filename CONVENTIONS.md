@@ -19,20 +19,19 @@ Do **not** put `license` in frontmatter (or other portable-only keys like `metad
 
 Claude Code's accepted optional keys: `when_to_use`, `argument-hint`, `arguments`, `allowed-tools`, `disallowed-tools`, `disable-model-invocation`, `user-invocable`, `model`, `effort`, `context`, `agent`, `hooks`, `paths`, `shell`. The linter flags any key outside this set.
 
-**Model pin:** default new skills to `model: sonnet` to cut invocation cost, unless the skill's core job benefits from the main session's own model (often a stronger tier like Opus or Fable) - decide per skill, don't apply blindly. The dividing line that keeps recurring: **does the skill check work against a known rubric, or judge semantics?** Matching a diff against a defined checklist (WCAG criteria, known perf anti-patterns, tool output) is cheap-tier work. Deciding whether something is *actually* a defect - reasoning across files, separating a real problem from a plausible-looking nitpick - is where tier shows, and it is worth paying for wherever a miss is not caught downstream.
+**Model pin:** default new skills to *inheriting the session model* (no `model:` key) - pin down to `model: sonnet` only when the skill's job is provably mechanical, or bounded and recurring enough that cheapness outweighs a marginal quality delta (see `digest`, `next-steps`). The dividing line that keeps recurring: **does the skill check work against a known rubric, or judge semantics?** Matching output against a defined checklist (commit prefixes, tool output, marker-delimited transforms) is cheap-tier work. Anything involving judgment, safety-critical advice, or output whose quality compounds downstream (generated prompts, skill descriptions, review verdicts) runs at the session's own tier.
+
+(This flips the original pin-by-default policy, 2026-08: A/B bake-offs during the scaffold prune showed current bare models matching skill-guided output on judgment tasks, so the cheap-tier saving no longer covers the cost of a subtle miss. The `_template` accordingly ships with no `model:` key.)
 
 Prefer inherit over a hard pin to a strong tier (`model: opus`): a pin caps the skill at that tier even when the session runs on a stronger one. Pin down deliberately; never pin up.
 
-Confirmed exceptions to the sonnet default, and why:
-- `prune-test-suite` - exact logic/text comparison between tests and source; a cheaper tier risks missing subtle drift.
-- `audit`, `audit-fix` - in-depth, project-wide weakness analysis and remediation against broader project goals; this benefits from the stronger reasoning of whatever model is driving the main session.
-- `handoff` - reads the current session's own state and must be unflatteringly honest about what is unfinished; a cheaper tier is likelier to paper over the gaps that make a handoff worth writing.
-- `kickoff` - the generated prompt drives an entire successor session, so its quality compounds downstream.
-- `commit` - the one-commit-vs-split call is a judgment on real diffs, not a mechanical grouping.
-- `repo-adopt` - writes executable bash with safety gates and a starter CLAUDE.md for a repo it has just met.
-- `math-research` - literature review, complexity bounds, and numerical-stability judgment; a cheaper tier is likelier to produce plausible recall than a traceable citation.
-- `prompt-engineer` - the output is itself a prompt that drives another session, agent, or product surface, so its quality compounds downstream (same reasoning as `kickoff`); grounding research done mid-skill should also run at the session's own tier.
-- `session-report` - same reasoning as `handoff`, one step sharper: the report is merged into a session that will act on it, so an unverified claim presented as a finished one gets acted on. Separating "verified" from "believed" is judgment, not transcription.
+Skills that keep a sonnet pin, and why:
+- `release-notes` - mechanical grouping of conventional-commit prefixes.
+- `worktree-cleanup` - scripted, gated teardown; the merged-and-clean check is mechanical.
+- `deps-audit` - triage of audit/outdated/depcheck tool output.
+- `next-steps` - bounded, frequent status review; cheapness is the point.
+- `digest` - bounded read-only synthesis, runs on a schedule.
+- `sync-profile-readme` - marker-delimited text transformation behind a diff gate.
 
 **Tags in the body (hygiene, not a hard rule):** raw `<angle>` / XML-style tags are forbidden only in `name`/`description`. In the body they're allowed — conventional git notation like `git switch <branch>` is fine — but since the body is injected into an LLM context, prefer `{braces}` or backticks for placeholders where practical. The linter *warns* on body tags rather than failing.
 
