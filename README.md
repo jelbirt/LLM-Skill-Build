@@ -37,19 +37,27 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 
 The 8-command development pipeline from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (`/spec` → `/plan` → `/build` → `/test` → `/review-gate` → `/code-simplify` → `/webperf` → `/ship`) is installed into `~/.claude/` by [`scripts/install-agent-skills.sh`](scripts/install-agent-skills.sh) — a pinned, reproducible recipe that applies this repo's small port modifications (documented in the script header). Upstream content is not vendored here; an imported skill enters this repo only once it's been personally customized, at which point it moves to a root-level folder and comes off the recipe's install list.
 
-## Installing a skill
+## Installing
 
-Each skill is a self-contained folder. To install one:
+Each skill is a self-contained folder; each agent persona is a single file under
+[`agents/`](agents/). Install either with the same script — it lints first and
+refuses to install anything that fails.
 
 ```bash
-# Personal (available in all your projects):
-cp -r <skill-name> ~/.claude/skills/
-
-# Or project-scoped (this repo/project only):
-cp -r <skill-name> .claude/skills/
+scripts/install.sh --all              # every skill + every persona
+scripts/install.sh --all --symlink    # link instead of copy (repo stays source of truth)
+scripts/install.sh audit git-undo     # or pick by name
+scripts/install.sh --skills           # skills only
+scripts/install.sh --agents           # personas only
 ```
 
-Then invoke it with `/<skill-name>`, or just describe your task — Claude loads the skill automatically when the description matches.
+Skills land in `~/.claude/skills/`, personas in `~/.claude/agents/`. Override
+either with `CLAUDE_SKILLS_DIR` / `CLAUDE_AGENTS_DIR`. To scope a skill to one
+project instead, copy the folder into that repo's `.claude/skills/`.
+
+Then **fully quit and relaunch Claude Code** — new skills only enter the `/` menu
+on a cold start. Invoke with `/<skill-name>`, or just describe your task and
+Claude loads the skill when the description matches.
 
 ## Example
 
@@ -72,6 +80,8 @@ LLM-Skill-Build/
 ├── CONVENTIONS.md      # how skills here are authored + quality checklist
 ├── IDEAS.md            # backlog of skill candidates
 ├── _template/          # canonical SKILL.md starter
+├── agents/             # agent personas, one <name>.md per persona
+├── scripts/install.sh  # install skills + personas into ~/.claude
 ├── scripts/validate.sh # lint a skill folder
 └── <skill-name>/       # one folder per skill
 ```
