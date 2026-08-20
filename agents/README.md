@@ -21,20 +21,18 @@ This folder is only for personas the third-party recipe does **not** install.
 `test-engineer` and `web-performance-auditor` from pinned upstream; do not add
 files of those names here or the two installers will fight over the same paths.
 
-## TODO — two personas are referenced but not yet versioned
+## Pending personas
 
-`code-reviewer` and `security-auditor` are **not in this repo yet**. They exist
-only as hand-maintained files in `~/.claude/agents/` on the authoring machine.
+`code-reviewer` and `security-auditor` are referenced by the installed command
+set but are not included here yet.
 
-That is deliberate in `install-agent-skills.sh`, which skips both on the
-reasoning that user-level definitions take precedence over upstream's by design.
-The reasoning holds on a machine that already has them — and breaks on a fresh
-one, where nothing exists at any level to take precedence. Discovered while
-setting up a second machine: 30 skills, 8 commands, and 2 personas reproduced
-from a pinned recipe in one command, while these two could not be reproduced at
-all.
+[`scripts/install-agent-skills.sh`](../scripts/install-agent-skills.sh)
+deliberately skips both, on the reasoning that user-level definitions in
+`~/.claude/agents/` take precedence over upstream's by design. That reasoning
+holds only where those definitions already exist. On a clean install nothing
+exists at any level to take precedence, and the references do not resolve.
 
-**What still depends on them:**
+**What depends on them:**
 
 | Reference | Impact if missing |
 | :-------- | :---------------- |
@@ -45,7 +43,7 @@ all.
 | `agents/test-engineer.md` | None — prose only |
 | `agents/web-performance-auditor.md` | None — explicitly does not invoke other personas |
 
-**To close it,** from the machine holding the originals:
+**To add them,** from a machine holding the originals:
 
 ```bash
 cp ~/.claude/agents/code-reviewer.md    agents/
