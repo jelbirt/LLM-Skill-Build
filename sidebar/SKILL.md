@@ -23,6 +23,10 @@ Choose by what the question needs, then dispatch with the Task tool:
 
 When in doubt, use `Explore`. Spawn **one** subagent — do not fan out for a quick aside.
 
+**Dispatch at `model: "opus"`.** Pass it explicitly in the Agent call. This skill
+exists to keep research off the main session's budget; letting the subagent
+inherit a costlier session model defeats the point of delegating at all.
+
 **Research the repo first; go external only as a fallback.** Tell the subagent to answer from the codebase and project files whenever it can. It may use the web (it has `WebSearch`/`WebFetch`) *only* when the answer genuinely isn't in the project — e.g. external library behavior, a spec, or current best practice — and must then label the externally-sourced claim and cite its URL. For heavyweight, multi-source, fact-checked web research, use `/deep-research` instead.
 
 ## 2. Build a lightweight context envelope

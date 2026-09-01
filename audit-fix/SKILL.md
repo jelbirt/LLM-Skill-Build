@@ -67,7 +67,7 @@ Plan:
 
 ## Step 3 — Dispatch subagents in parallel
 
-For each group, spawn an `Agent`. Use `general-purpose` by default; route to a specialist only when the fix itself needs specialist judgment (e.g., `security-reviewer` for non-trivial auth fixes).
+For each group, spawn an `Agent`. Use `general-purpose` by default; route to a specialist only when the fix itself needs specialist judgment (e.g., `security-reviewer` for non-trivial auth fixes). Pass `model: "opus"` explicitly on every dispatch: this step fans out one agent per file group, so an inherited session model multiplies across the whole group set.
 
 Launch all group agents in a **single message with multiple `Agent` tool calls** so they run concurrently.
 

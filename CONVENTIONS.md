@@ -23,7 +23,19 @@ Claude Code's accepted optional keys: `when_to_use`, `argument-hint`, `arguments
 
 (This flips the original pin-by-default policy, 2026-08: A/B bake-offs during the scaffold prune showed current bare models matching skill-guided output on judgment tasks, so the cheap-tier saving no longer covers the cost of a subtle miss. The `_template` accordingly ships with no `model:` key.)
 
-Prefer inherit over a hard pin to a strong tier (`model: opus`): a pin caps the skill at that tier even when the session runs on a stronger one. Pin down deliberately; never pin up.
+Prefer inherit over a hard pin to a strong tier (`model: opus`) for the skill's **own** body: a pin caps the skill at that tier even when the session runs on a stronger one. Pin down deliberately; never pin up.
+
+**Subagents a skill dispatches are a separate question, and the default flips.** The rule above governs the tier the skill's own body runs at. It does *not* govern the tier of subagents the skill launches through the Agent tool, where staying silent is actively wrong: the session model propagates to every agent spawned, so a fan-out skill multiplies the session's tier across N agents, and a skill whose whole purpose is to move work *off* the main session's budget hands that budget right back. A skill that dispatches subagents therefore **names a tier explicitly** in its dispatch instruction rather than letting inherit decide.
+
+(Added 2026-09, after Fable-tier sessions were found propagating into every dispatched agent. The named tier is a ceiling on delegated work, not a claim that the job requires that tier: pick the lowest tier that does the job, same test as the pin-down rule above.)
+
+Skills that name a tier for the agents they dispatch:
+- `sidebar` - `opus`; the skill exists to keep research off the main session's budget.
+- `flowchart` - `opus`; one exploration dispatch per request.
+- `audit-fix` - `opus`; fans out one agent per file group, so the tier multiplies.
+- `next-steps` - `sonnet`; bounded, frequent status review, cheapness is the point.
+
+The same reasoning applies to persona definitions in `~/.claude/agents/` (outside this repo): an agent file with no `model:` key inherits on every invocation, so the high-frequency reviewers there name a tier as well.
 
 Skills that keep a sonnet pin, and why:
 - `release-notes` - mechanical grouping of conventional-commit prefixes.

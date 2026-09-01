@@ -20,7 +20,9 @@ one exploration dispatch, one render call.
 
 2. Decide whether this needs codebase exploration:
    - Code/architecture/feature scope: dispatch exactly one Explore agent (use
-     general-purpose instead if the repo is large or unfamiliar). Ask it to
+     general-purpose instead if the repo is large or unfamiliar), passing
+     `model: "opus"` explicitly so the exploration does not inherit a costlier
+     session model. Ask it to
      return a compact structured outline - entry points, ordered steps, decision
      branches, terminal states, with file:line refs - not file contents. Tell it
      to abstract minor steps and cap at roughly 20-25 meaningful nodes. For a
