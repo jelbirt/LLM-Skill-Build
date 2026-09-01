@@ -32,8 +32,9 @@
 # Port modifications applied to the upstream files before install:
 #   1. Strip the `agent-skills:` plugin-namespace prefix from command files so
 #      skill references resolve as plain ~/.claude/skills folders.
-#   2. Add `model: sonnet` to 1 mechanical skill (browser-testing-with-devtools)
-#      and 1 persona (web-performance-auditor) — each works from a known rubric
+#   2. Pin model tiers. `model: sonnet` on 1 mechanical skill
+#      (browser-testing-with-devtools) and 1 persona (web-performance-auditor):
+#      each works from a known rubric
 #      of anti-patterns rather than judging semantics from scratch, with a
 #      mandated verify step. Everything else inherits the session model:
 #      code-simplification was unpinned in the 2026-08 tier-4 sweep
@@ -41,6 +42,10 @@
 #      spec/build/review quality compounds downstream — review is the last
 #      line of defense under the one-pass-per-diff policy, so a missed defect
 #      is not caught anywhere else.
+#      `model: opus` on test-engineer, because /ship dispatches it in parallel
+#      with two other personas and an inherited session model multiplies
+#      across that fan-out. Without this the pin would be silently reverted
+#      every time this installer runs.
 #   3. Rename command review.md -> review-gate.md (Claude Code's built-in
 #      /review shadows a user command of the same name).
 #   4. Bundle upstream's shared references/*.md checklists into each installed
@@ -81,6 +86,7 @@ SKILLS=(
 SONNET_SKILLS=(browser-testing-with-devtools)
 AGENTS=(test-engineer web-performance-auditor)
 SONNET_AGENTS=(web-performance-auditor)
+OPUS_AGENTS=(test-engineer)
 
 claude_dir="${CLAUDE_DIR:-$HOME/.claude}"
 latest=0
@@ -104,13 +110,14 @@ src="$tmp/upstream"
 # Mod 1: strip plugin namespace in command files.
 sed -i 's/agent-skills://g' "$src"/.claude/commands/*.md
 
-# Mod 2: pin cheap-model candidates to Sonnet (insert before closing '---').
-pin_sonnet() {
-  awk 'NR>1 && /^---[[:space:]]*$/ && !done {print "model: sonnet"; done=1} {print}' \
+# Mod 2: pin model tiers (insert before closing '---').
+pin_model() {
+  awk -v tier="$2" 'NR>1 && /^---[[:space:]]*$/ && !done {print "model: " tier; done=1} {print}' \
     "$1" > "$1.tmp" && mv "$1.tmp" "$1"
 }
-for s in "${SONNET_SKILLS[@]}"; do pin_sonnet "$src/skills/$s/SKILL.md"; done
-for a in "${SONNET_AGENTS[@]}"; do pin_sonnet "$src/agents/$a.md"; done
+for s in "${SONNET_SKILLS[@]}"; do pin_model "$src/skills/$s/SKILL.md" sonnet; done
+for a in "${SONNET_AGENTS[@]}"; do pin_model "$src/agents/$a.md" sonnet; done
+for a in "${OPUS_AGENTS[@]}"; do pin_model "$src/agents/$a.md" opus; done
 
 # Mod 3: /review is shadowed by Claude Code's built-in — install as /review-gate.
 mv "$src/.claude/commands/review.md" "$src/.claude/commands/review-gate.md"
