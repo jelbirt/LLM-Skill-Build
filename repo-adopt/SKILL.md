@@ -1,6 +1,6 @@
 ---
 name: repo-adopt
-description: Scaffold any repo for a parallel-workstream worktree workflow - tailored scripts/new-worktree.sh and rm-worktree.sh wired to that repo's own gitignored local state (secrets to copy, caches to share, envs to recreate), a checks.sh that defines the green bar once, a CI workflow that runs it, a commit-guard hook enforcing that bar and the default-branch rule on agent commits, and a repo-local worktree-cleanup skill; optionally a decisions-first PR template and a starter CLAUDE.md plus tasks/todo.md. Handles multi-project repos with several sub-project manifests, not only one stack at the root. Use whenever the user wants to adopt, onboard, or set up a repo or a brand-new project for git worktrees or parallel agent sessions, says "repo-adopt", "adopt this repo", "wire this repo for worktrees", or "set this project up for parallel sessions". Supports a dry-run that reports what it would create without writing anything.
+description: Scaffold any repo for a parallel-workstream worktree workflow - tailored scripts/new-worktree.sh and rm-worktree.sh wired to that repo's own gitignored local state (secrets to copy, caches to share, envs to recreate), a checks.sh that defines the green bar once, a CI workflow that runs it, an optional commit-guard hook enforcing that bar and the default-branch rule on agent commits, and a repo-local worktree-cleanup skill; optionally a decisions-first PR template and a starter CLAUDE.md plus tasks/todo.md. Handles multi-project repos with several sub-project manifests, not only one stack at the root. Use whenever the user wants to adopt, onboard, or set up a repo or a brand-new project for git worktrees or parallel agent sessions, says "repo-adopt", "adopt this repo", "wire this repo for worktrees", or "set this project up for parallel sessions". Supports a dry-run that reports what it would create without writing anything.
 argument-hint: [repo path] [--dry-run]
 ---
 
@@ -67,6 +67,15 @@ Detect, and record what you find:
    `scripts/rm-worktree.sh`, `.claude/skills/`, CI workflows, PR template,
    `CLAUDE.md`, `tasks/todo.md`. Never clobber; propose a diff against what
    exists instead.
+6. **Whether they want a commit guard**: ask, never assume. It is the one
+   generated piece that costs something on every commit: it runs the full bar
+   before each one, which can be a minute or more. In a repo whose CI already
+   blocks a red PR, its unique contribution is surfacing mechanical failures at
+   commit time instead of at CI time, which is feedback latency rather than a
+   correctness gate. Offer it, name that trade honestly, and take no for an
+   answer. Ask about its two halves separately: running the bar (slow) and
+   blocking commits on the default branch (instant, just a branch-name check).
+   They are independent and are often wanted one without the other.
 
 ## 2. Scaffold
 
@@ -186,7 +195,8 @@ existed will otherwise carry violations into every repo this skill touches.
   at the first. Skip or adapt when the repo has no remote or already has
   CI.
 - **Commit guard** (`.claude/hooks/pre-commit-guard.sh` plus the
-  `PreToolUse` wiring in `.claude/settings.json`) — enforces at the tool
+  `PreToolUse` wiring in `.claude/settings.json`, **only when asked for in
+  step 1.6**) — enforces at the tool
   call what CLAUDE.md only states. Before any agent-made `git commit` into
   this repo it runs `scripts/checks.sh` and blocks on failure; in a repo
   that declared PR-based flow (step 1.1) it also blocks commits on the
@@ -307,7 +317,7 @@ existed will otherwise carry violations into every repo this skill touches.
   irreversible step. Also confirm the refusals still refuse: a dirty
   tree, an unmerged branch without `--force`, and a run from inside the
   worktree.
-- **Verify the commit guard** by feeding it hand-built payloads rather
+- **Verify the commit guard, if one was generated,** by feeding it hand-built payloads rather
   than by trusting it — and test the BLOCK side against a deliberately
   FAILING `checks.sh`, not only the allow side: a matrix that only ever
   exercises the allow path cannot distinguish "bar ran and passed" from
