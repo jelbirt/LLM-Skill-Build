@@ -72,6 +72,11 @@ Detect, and record what you find:
 
 Generate, confirming the choices flagged in step 1:
 
+Everything below is new text, so the owner's global formatting rules apply
+to all of it. When adapting a file from another repo, normalize it rather
+than preserving its punctuation verbatim: a source written before a rule
+existed will otherwise carry violations into every repo this skill touches.
+
 - **`scripts/new-worktree.sh`** — usage `scripts/new-worktree.sh {branch}
   [dir]`; creates the worktree from the default branch, reusing the branch
   if it already exists; then wires this repo's specific state — symlink the
@@ -79,21 +84,70 @@ Generate, confirming the choices flagged in step 1:
   header comment documents WHAT is wired and WHY, plus the shared-state pen
   rule when step 1.3 found any — naming every co-holder it found, including
   other repos and scheduled jobs, since a pen rule scoped to worktrees reads
-  as safe while the real conflict sits outside them. Use `set -euo pipefail`,
+  as safe while the real conflict sits outside them. When the wiring assigns
+  a NUMBERED per-worktree resource — a proxy port, a schema suffix, a
+  display number — **claim it, don't hash it**: read what the sibling
+  worktrees have already taken (their `.env.worktree` or equivalent) and
+  check for live listeners before picking. Two branch names can hash to the
+  same number, and that collision surfaces as a mid-session bind failure
+  long after creation, not as an error at the moment someone could fix it.
+  Wrap the wiring in an EXIT trap that removes the worktree again if a
+  later step fails — a half-wired worktree (created but never fully wired)
+  otherwise survives as a trap for the next session that finds it.
+  Use `set -euo pipefail`,
   set the executable
   bit, and end by echoing the new path and `scripts/checks.sh` as the
   next step.
 - **`scripts/rm-worktree.sh`** — the teardown mirror; usage
   `scripts/rm-worktree.sh {branch} [--force] [--delete-remote]`. Gate before
   removing anything: the branch is merged into the default branch, the tree
-  is clean, the target is not the main checkout, and it is not the current
+  is clean, the target is not the main checkout, and it is not the caller's
   working directory. Then, in this order: `git worktree remove {dir}`,
-  `git branch -d {branch}`, `git worktree prune` — the branch delete must
+  `git branch -D {branch}`, `git worktree prune` — the branch delete must
   come after the worktree removal, since git refuses to delete a branch
-  that is still checked out somewhere. `--force` covers squash-merged
-  branches, which the merged-check cannot see (it upgrades the branch
-  delete to `-D`); `--delete-remote` optionally deletes the remote branch
-  as well.
+  that is still checked out somewhere. That ordering makes the removal
+  irreversible by the time the delete runs, so **nothing after it may
+  veto: `-D`, with the script's own merged gate as the sole authority**.
+  `git branch -d` asks a DIFFERENT question — reachable from HEAD or
+  upstream, not "merged into the default branch" — and when the two
+  disagree it refuses after the worktree is already gone, leaving a
+  half-torn-down repo (branch orphaned, prune never run) and an error that
+  steers users toward `--force`, the one flag that skips the merged gate.
+  The gates themselves have edges, each of which cost a real bug to learn:
+  - **Merged** compares FULLY-QUALIFIED refs — `refs/heads/{branch}` is
+    an ancestor of `refs/heads/{default}` OR of
+    `refs/remotes/origin/{default}`; either counts as merged (fetch
+    first, tolerating offline). A bare name lets a same-named tag win the
+    lookup, and checking only local makes every PR-merged branch read as
+    unmerged, which trains the `--force` habit.
+  - **Clean** captures `git -C {dir} status --porcelain` output and exit
+    code SEPARATELY and refuses on either. `[ -n "$(...)" ]` discards the
+    exit code, so a status that FAILS reads as clean.
+  - A registered worktree whose directory is MISSING is refused outright,
+    pointing at `git worktree repair` — otherwise the first signal is the
+    clean gate refusing with an unrelated-looking `cannot change to`
+    error, long after the real cause (a moved directory) was fixable.
+  - The "you are standing inside it" gate needs BOTH spellings of the cwd
+    against BOTH spellings of the worktree path, and both snapshots must be
+    taken on the script's FIRST line, before any `cd`. Read after a `cd` to
+    the repo root, `$PWD` IS the repo root, so the check compares it against
+    itself and never fires. Physical alone (`pwd -P`) is not enough either:
+    a shared directory symlinked INTO a worktree resolves back OUT of it, so
+    the physical cwd lands outside the worktree. Teardown does not delete
+    that directory (it removes the symlink, never following it to the
+    target), but `$PWD` is left naming a path inside a worktree that no
+    longer exists, which is what the gate promises will not happen.
+    Logical alone fails the
+    mirror case, an ancestor symlink on the worktree path. Snapshot both
+    forms up front, resolve the worktree path as well, and compare each
+    snapshot against both. Verify by running the SCRIPT from inside a
+    symlinked directory, never by testing the comparison in isolation: the
+    pattern can be correct while the script that runs it is not, and that
+    failure looks exactly like a pass.
+
+  `--force` covers squash-merged branches, which the merged-check cannot
+  see (it bypasses the merged gate only, never the clean-tree gate);
+  `--delete-remote` optionally deletes the remote branch as well.
 - **`scripts/checks.sh`** — the single definition of the green bar: the
   repo's real lint / format / typecheck / test commands from step 1.4, in
   one executable script. CI runs it and so does the commit hook below, so
@@ -110,10 +164,22 @@ Generate, confirming the choices flagged in step 1:
   with that line if the bootstrap is unavailable. Tell the header that
   changing this script means updating the CLAUDE.md Commands section in
   the same commit.
+  The shell-syntax check must glob `.claude/hooks/` as well as `scripts/`.
+  The commit guard below is a generated script, and it is the one file
+  where going unchecked is worst: a syntax error makes it exit non-zero,
+  and any code other than 2 lets the commit through, so the guard becomes
+  the silent no-op its own header warns about. Guard the loop with
+  `[ -f "$f" ] || continue` so an unmatched glob is skipped, not parsed.
 - **CI workflow** (`.github/workflows/ci.yml`) — on pull_request and on push
   to the default branch; locked install (`uv sync --frozen`, `npm ci`, ...)
-  reading the pinned toolchain version; then `scripts/checks.sh`, not a
-  re-listing of the commands. Add `bash -n` over the generated scripts.
+  reading the pinned toolchain version; then `scripts/checks.sh` and
+  **nothing else** — not a re-listing of the commands, and no CI-only
+  extras. A check that exists only in CI breaks the local-green-means-CI-
+  green promise, so anything worth checking — including `bash -n` over the
+  generated scripts — goes in `checks.sh` itself. And `bash -n` takes ONE
+  file per invocation: `bash -n a.sh b.sh` parses only `a.sh` and hands the
+  rest to it as positional parameters, so the scripts most in need of a
+  syntax check are the ones that never get it. Loop, one file at a time.
   For a multi-project repo whose sub-projects do NOT share a bar, use a
   matrix — one job per sub-project, each passing its path to
   `scripts/checks.sh` — so a failure names which one instead of stopping
@@ -133,6 +199,33 @@ Generate, confirming the choices flagged in step 1:
     differ per worktree, and running the wrong one passes a green tree
     while the dirty one lands. Prefer each worktree's own `checks.sh` so a
     branch that changes the bar is judged by its own version.
+  - **Anchor on the payload's `cwd`, never `getcwd()`.** The hook process
+    does not start where the session's shell is standing — the payload's
+    `cwd` field is where a bare `git commit` actually lands, so `getcwd()`
+    judges the wrong tree. Fall back to the repo root, not to the process
+    cwd. And when the guard shells into an embedded parser, pass that
+    anchor via the ENVIRONMENT, never argv: under `node -e` (and
+    similarly `python -c`) the argv indexing SHIFTS relative to a normal
+    script invocation — `process.argv[2]` is silently undefined under
+    `-e` — so an argv-based anchor degrades right back to the process
+    cwd. The environment does not shift.
+  - **Normalize the target with `git rev-parse --show-toplevel`** before
+    looking up its `checks.sh`. git commits happily from a subdirectory,
+    and without this `cd src && git commit` looks for
+    `src/scripts/checks.sh`, finds nothing, and fails open — a pass with
+    no test ever run.
+  - **Escapes count only in command-prefix position** — a `VAR=value`
+    assignment at the start of a segment or directly before the `git`
+    token, never a substring match over the whole command. A substring
+    match lets a commit MESSAGE that merely mentions the escape activate
+    it, and since CLAUDE.md documents the escapes by name, messages
+    about the guard are guaranteed to mention them.
+  - **Gate every commit-writing subcommand** — `commit`, `merge`, `pull`,
+    `cherry-pick`, `revert`, `am`, `rebase` — matched as
+    whitespace-delimited tokens, never `\b`: hyphens are word boundaries,
+    so `\bam\b` matches inside a path like `/home/i-am-here/`. A verb
+    that cannot be resolved gets the STRICTEST treatment (`commit`), not
+    a skip.
   - **Parse the command shell-aware.** Split on operators, skip `env` and
     `VAR=` prefixes and git global flags, follow `cd` so the target
     worktree is the one that receives the commit, and recurse into
@@ -155,6 +248,13 @@ Generate, confirming the choices flagged in step 1:
     every override is deliberate and visible in the transcript. Document
     them in CLAUDE.md. A gate with no legitimate override gets bypassed
     illegitimately.
+  - **Wire `settings.json` defensively.** Quote the command path —
+    `"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-commit-guard.sh"` — and set an
+    explicit, generous `"timeout"` (e.g. `180`): a real bar can
+    legitimately run for minutes, and the 60s default kills the hook
+    mid-run, discarding the exit-2 verdict so the commit PROCEEDS. Both
+    an unquoted path with a space and a timed-out hook are silent no-ops
+    that look installed.
   Skip the branch rule in repos that are deliberately direct-to-main.
 - **Repo skill `worktree-cleanup`**
   (`.claude/skills/worktree-cleanup/SKILL.md`) — a thin wrapper over
@@ -184,21 +284,52 @@ Generate, confirming the choices flagged in step 1:
 - **Dry-run:** print each proposed file in full, plus the questions you
   would have asked. Where the repo already has an equivalent, diff proposal
   against existing and say whether adoption would be a no-op.
-- **Real run:** `bash -n` every generated script, create a throwaway
-  worktree with `new-worktree.sh` and confirm the wiring (symlinks resolve,
-  secrets copied, shared dirs shared and per-worktree dirs not), then tear
-  it down with `rm-worktree.sh --force` to exercise the teardown path end
-  to end. Confirm the throwaway worktree reports a **clean** `git status`:
-  a wired path that the repo's ignore rules do not actually match leaves
-  every worktree permanently dirty and un-teardownable, and only a real
-  round trip surfaces it. Run `scripts/checks.sh` to confirm the bar is
-  real before committing anything.
-- **Verify the commit guard** by feeding it hand-built payloads rather than
-  by trusting it: a non-commit command, a commit on a workstream branch, a
-  commit on the default branch, each escape, a commit aimed at a different
-  repo, and the indirection forms (`git -C`, `cd &&`, `sh -c`, heredoc
-  message). Blocking what should pass is as much a defect as passing what
-  should block, and both are cheap to check now and expensive to discover
+- **Real run:** `bash -n` every generated script — ONE file per
+  invocation, since `bash -n a.sh b.sh` parses only the first — then
+  create a throwaway worktree with `new-worktree.sh` and confirm the
+  wiring (symlinks resolve, secrets copied, shared dirs shared and
+  per-worktree dirs not). Confirm the throwaway worktree reports a
+  **clean** `git status`: a wired path that the repo's ignore rules do not
+  actually match leaves every worktree permanently dirty and
+  un-teardownable, and only a real round trip surfaces it. Run
+  `scripts/checks.sh` to confirm the bar is real before committing
+  anything.
+- **Exercise the teardown WITHOUT `--force`** — never verify with it.
+  `--force` skips the merged gate, so a forced teardown exercises none of
+  the logic users actually depend on; verifying that way is exactly how a
+  broken teardown shipped everywhere while every adoption "verified
+  green". Arrange the throwaway branch so the merged gate and
+  `git branch -d` would DISAGREE: merge the branch into the default
+  branch, advance the default branch past it, and move HEAD somewhere
+  else — the branch is now an ancestor of the default branch but NOT
+  reachable from HEAD. A correct teardown completes fully (worktree gone,
+  branch gone, prune run); a broken one aborts half-done after the
+  irreversible step. Also confirm the refusals still refuse: a dirty
+  tree, an unmerged branch without `--force`, and a run from inside the
+  worktree.
+- **Verify the commit guard** by feeding it hand-built payloads rather
+  than by trusting it — and test the BLOCK side against a deliberately
+  FAILING `checks.sh`, not only the allow side: a matrix that only ever
+  exercises the allow path cannot distinguish "bar ran and passed" from
+  "bar never ran". TIME the gated commits for the same reason — a gated
+  commit takes roughly as long as the bar itself, so a millisecond
+  verdict means nothing ran. The matrix:
+  - a non-commit command, and a commit aimed at a different repo → allow
+  - a commit on a workstream branch with a green tree → allow, at
+    bar-runtime speed
+  - a commit on the default branch → block
+  - each escape in command-prefix position → that rule waived, others
+    intact
+  - a commit whose MESSAGE contains each escape verbatim → still gated
+  - a bare `git commit` whose payload `cwd` is inside the repo while the
+    hook process starts OUTSIDE it → still gated (the `getcwd()` trap)
+  - a commit from a SUBDIRECTORY of the worktree → still finds and runs
+    the root's `checks.sh` (against a failing bar, so the block proves it
+    ran)
+  - the indirection forms (`git -C`, `cd &&`, `sh -c`, heredoc message)
+
+  Blocking what should pass is as much a defect as passing what should
+  block, and both are cheap to check now and expensive to discover
   mid-commit.
 - Land the changes per the target repo's own commit and review policy (read
   its CLAUDE.md): propose commits, and never auto-merge.
