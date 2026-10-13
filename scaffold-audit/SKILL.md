@@ -1,6 +1,6 @@
 ---
 name: scaffold-audit
-description: Run the periodic audit of Claude Code scaffolding - inventory every skill, command, agent, hook, permission list, and model pin across ~/.claude, triage each against the decay patterns that make old-model-era components harmful on newer models, gather A/B bake-off evidence for the contested ones, then prune with verified reference cleanup and git-versioned rollback. Use when the user says "scaffold audit", "prune my config", "audit my skills/setup", "Cherny prune", or "delete your CLAUDE.md and see what happens", when a new Claude model generation ships, or roughly every 6 months since the last audit.
+description: Run the periodic audit of Claude Code scaffolding - inventory every skill, command, agent, hook, permission list, and model pin across ~/.claude, triage each against the decay patterns that make old-model-era components harmful on newer models, gather A/B bake-off evidence for the contested ones, then prune with verified reference cleanup and git-versioned rollback. Use when the user says "scaffold audit", "prune my config", "audit my skills/setup", "Cherny prune", or "delete your CLAUDE.md and see what happens", when a new Claude model generation or point release ships, or roughly every 6 months since the last audit.
 argument-hint: [optional focus, e.g. "skills only" or "since last audit"]
 ---
 
@@ -20,15 +20,24 @@ majority of Claude Code's system prompt at the Opus 5 transition. This skill
 makes that ritual repeatable and evidence-based instead of
 delete-everything-and-pray.
 
+**Full or scoped.** A new model generation, or ~6 months since the last
+audit, calls for the full run below. A point release in the family the user
+works on daily (5 to 5.5, say) calls for a scoped run: re-test only the
+decisions that rested on measured model behavior (components kept or cut by
+bake-off, and suspects never tested), plus hygiene. Durable policy and
+already-settled dedupes carry over without retesting.
+
 ## Step 1 - Orient, then inventory
 
-Read whatever record the previous audit left (audit memory or notes,
-config-repo tags, install-recipe history) and establish what was already
-retired and what was deliberately kept, so the audit starts from decisions,
-not from scratch.
+Read the audit log at `~/.claude/scaffold-audit-log.md` (Step 5 writes it)
+and establish what was already retired, what was deliberately kept, and on
+what evidence and model, so the audit starts from decisions, not from
+scratch. If no log exists, reconstruct one from config-repo tags and commit
+messages and install-recipe history before going further.
 
-Delegate the inventory to a subagent (it is bulky, mechanical reading).
-Contract: counts and per-component rows (name, kind, size, model pin, one-line
+Take the inventory inline. It is mechanical reading, but a briefing would cost
+more than the reading saves and would return a claim to re-verify. Cover
+counts and per-component rows (name, kind, size, model pin, one-line
 purpose) for `~/.claude/{skills,commands,agents,workflows}`, hooks and
 permission lists in `settings*.json`, plugins, and the user CLAUDE.md - plus
 overlap clusters, model-era prose ("use a Sonnet subagent", tier-specific
@@ -56,7 +65,11 @@ their sources (repo skills, pinned install recipes).
 For each contested skill, run a matched A/B pair of subagents on a fixture
 with **ground truth the agents cannot see**: a planted bug with a known root
 cause, hidden acceptance tests, a diff with planted issues, a rubric of
-gotchas. Same prompt, same model; the only difference is that one arm must
+gotchas. These are subagents because the arms must not see the key or each
+other, not to save context. Same prompt, same model: run both arms on
+`opus`, the floating alias for the tier daily work and dispatched subagents
+run on, never a pinned ID, and record the resolved model ID in the log. The
+only difference is that one arm must
 read and follow the skill. Grade outcomes against the key - never vibes - and
 verify claims yourself (run the hidden tests, probe the result, diff the two
 arms). Record tokens and wall time per arm.
@@ -86,16 +99,18 @@ unrecoverable delete. Then:
 
 Commit the results: the config repo (`~/.claude`) and any source repos each
 get commits and, at milestones, tags - the previous state must stay one
-`git checkout` away. Update the audit memory/notes with what was cut, what
-was kept *and the evidence for each*, so the next audit starts from decisions.
-Note the date; the next audit is due at the next model generation or ~6 months,
-whichever comes first.
+`git checkout` away. Add a dated entry at the top of `~/.claude/scaffold-audit-log.md`
+and commit it with the config repo: the model IDs the evidence was gathered
+on, what was cut, what was kept, each with its evidence (bake-off fixture and
+score, or the judgment and why), and the rollback tag. The next audit starts
+from this file. Due next: the next model generation or point release, or ~6
+months, whichever comes first.
 
 ## Gates
 
 - Cuts, merges, and commits are proposed to the user and wait for approval -
   batch the questions (AskUserQuestion) rather than dribbling them.
-- Bake-offs cost real tokens (~60-160k per pair); state the estimate before
-  launching more than a couple of pairs.
+- Bake-offs cost real tokens (~60-160k per pair); state the estimate and wait
+  for approval before launching any pair.
 - This skill prunes scaffolding; it never touches project code, and it never
   deletes the only copy of anything.
