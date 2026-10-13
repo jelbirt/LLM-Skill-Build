@@ -6,11 +6,11 @@
 # Upstream:  https://github.com/addyosmani/agent-skills  (MIT)
 # Pinned at: 70b7506ce90e200cb47645ddb3f6b8e84fecc047  (vendored 2026-07-07)
 #
-# Installs (18 files):
-#   - 8 skills   -> ~/.claude/skills/     (Define: interview-me, idea-refine,
+# Installs (15 files):
+#   - 7 skills   -> ~/.claude/skills/     (Define: interview-me, idea-refine,
 #     spec-driven-development · Build: doubt-driven-development · Verify:
-#     browser-testing-with-devtools · Review: security-and-hardening,
-#     code-simplification · Ship: shipping-and-launch)
+#     browser-testing-with-devtools · Review: security-and-hardening ·
+#     Ship: shipping-and-launch)
 #
 #     Six upstream skills are deliberately NOT installed (retired 2026-08-10
 #     after A/B bake-offs against the bare model showed identical outcomes on
@@ -20,8 +20,14 @@
 #     planning-and-task-breakdown, incremental-implementation.
 #     security-and-hardening, tested the same way, measurably earned its keep
 #     and stays. Mod 5 rewrites all remaining upstream references to the six.
-#   - 8 commands -> ~/.claude/commands/   (/spec /plan /build /test
-#     /review-gate /code-simplify /webperf /ship)
+#   - 6 commands -> ~/.claude/commands/   (/spec /plan /build /test
+#     /webperf /ship)
+#
+#     Upstream's /review and /code-simplify commands and the
+#     code-simplification skill behind the latter are deliberately NOT
+#     installed (retired 2026-10-13):
+#     Claude Code now ships /code-review and /simplify for the same two jobs,
+#     and the pair would otherwise sit side by side in the skill list.
 #   - 2 personas -> ~/.claude/agents/     (test-engineer,
 #     web-performance-auditor). code-reviewer and security-auditor are
 #     deliberately NOT installed — user-level files of those names in
@@ -37,8 +43,6 @@
 #      each works from a known rubric
 #      of anti-patterns rather than judging semantics from scratch, with a
 #      mandated verify step. Everything else inherits the session model:
-#      code-simplification was unpinned in the 2026-08 tier-4 sweep
-#      (behavior-preserving refactors are correctness-critical), and
 #      spec/build/review quality compounds downstream — review is the last
 #      line of defense under the one-pass-per-diff policy, so a missed defect
 #      is not caught anywhere else.
@@ -46,13 +50,15 @@
 #      with two other personas and an inherited session model multiplies
 #      across that fan-out. Without this the pin would be silently reverted
 #      every time this installer runs.
-#   3. Rename command review.md -> review-gate.md (Claude Code's built-in
-#      /review shadows a user command of the same name).
+#   3. Drop the review.md and code-simplify.md commands (see above). review.md
+#      was previously installed as /review-gate because Claude Code's
+#      built-in /review shadows a user command of the same name.
 #   4. Bundle upstream's shared references/*.md checklists into each installed
 #      skill folder — only the files that skill's SKILL.md actually cites —
 #      so `references/...` mentions resolve relative to the skill directory
 #      without tripling the footprint with never-loaded copies.
-#   5. Rewrite references to the six retired skills (see above), plus
+#   5. Rewrite references to the six retired skills and the two retired
+#      commands (see above), plus
 #      upstream's dangling `context-engineering` reference, wherever they
 #      remain — the commands, the three installed skills that cite them, the
 #      shared reference checklists, and one agent persona — so nothing points
@@ -80,7 +86,7 @@ SKILLS=(
   interview-me idea-refine spec-driven-development
   doubt-driven-development
   browser-testing-with-devtools
-  security-and-hardening code-simplification
+  security-and-hardening
   shipping-and-launch
 )
 SONNET_SKILLS=(browser-testing-with-devtools)
@@ -119,11 +125,12 @@ for s in "${SONNET_SKILLS[@]}"; do pin_model "$src/skills/$s/SKILL.md" sonnet; d
 for a in "${SONNET_AGENTS[@]}"; do pin_model "$src/agents/$a.md" sonnet; done
 for a in "${OPUS_AGENTS[@]}"; do pin_model "$src/agents/$a.md" opus; done
 
-# Mod 3: /review is shadowed by Claude Code's built-in — install as /review-gate.
-mv "$src/.claude/commands/review.md" "$src/.claude/commands/review-gate.md"
+# Mod 3: retire /review and /code-simplify in favor of Claude Code's built-in
+# /code-review and /simplify.
+rm "$src/.claude/commands/review.md" "$src/.claude/commands/code-simplify.md"
 
-# Mod 5: rewrite references to the six retired skills so nothing installed
-# points at a skill that no longer exists. The command bodies are already
+# Mod 5: rewrite references to the six retired skills and the two retired
+# commands so nothing installed points at something that no longer exists. The command bodies are already
 # self-contained workflows; these edits drop the invocation pointers and inline
 # the one piece of guidance that would otherwise be lost. (Also fixes
 # upstream's dangling `context-engineering` reference — that skill never
@@ -132,17 +139,15 @@ sed -i '/^Invoke the test-driven-development skill\.$/{N;d;}' "$src/.claude/comm
 sed -i '/^Invoke the incremental-implementation skill alongside test-driven-development\.$/{N;d;}' "$src/.claude/commands/build.md"
 sed -i "s|a test can't be made to pass or the build breaks without an obvious fix → follow debugging-and-error-recovery|a test can't be made to pass or the build breaks without an obvious fix → stop and debug to the root cause; never patch symptoms to keep moving|" "$src/.claude/commands/build.md"
 sed -i 's|If any step fails, follow the debugging-and-error-recovery skill\.|If any step fails, stop and debug to the root cause before continuing — reproduce the failure, isolate the cause, fix, and re-verify.|' "$src/.claude/commands/build.md"
-sed -i '/^Invoke the code-review-and-quality skill\.$/{N;d;}' "$src/.claude/commands/review-gate.md"
-sed -i 's|Use `code-review-and-quality` to review the result\.|Review the result with the code-reviewer agent.|' "$src/.claude/commands/code-simplify.md"
-sed -i 's|- \*\*`code-review-and-quality` / `/review`\*\*: complementary\.|- **`/review-gate` / `/review`**: complementary.|' "$src/skills/doubt-driven-development/SKILL.md"
+sed -i 's|- \*\*`code-review-and-quality` / `/review`\*\*: complementary\.|- **`/code-review` / `/review`**: complementary.|' "$src/skills/doubt-driven-development/SKILL.md"
 sed -i "s|- \*\*\`test-driven-development\`\*\*: TDD's RED step|- **TDD (\`/test\`)**: TDD's RED step|" "$src/skills/doubt-driven-development/SKILL.md"
 sed -i 's|- \*\*`debugging-and-error-recovery`\*\*: when the reviewer surfaces a real failure mode, drop into the debugging skill to localize and fix\.|- **Debugging**: when the reviewer surfaces a real failure mode, reproduce it, localize the root cause, and fix before proceeding.|' "$src/skills/doubt-driven-development/SKILL.md"
-sed -i 's|The depth behind these items lives in `code-review-and-quality` (the five-axis review) and|The depth behind these items lives in the five-axis review (`/review-gate`) and|' "$src/references/definition-of-done.md"
-sed -i 's|/review → code-reviewer (with code-review-and-quality skill) → report|/review → code-reviewer agent → report|' "$src/references/orchestration-patterns.md"
+sed -i 's|The depth behind these items lives in `code-review-and-quality` (the five-axis review) and `code-simplification` (reducing complexity without changing behavior)\.|The depth behind these items lives in the built-in `/code-review` (correctness review) and `/simplify` (reducing complexity without changing behavior).|' "$src/references/definition-of-done.md"
+sed -i 's|\*\*Examples in this repo:\*\* `/review`, `/test`, `/code-simplify`\.|**Examples in this repo:** `/test`, `/webperf`.|' "$src/references/orchestration-patterns.md"
+sed -i 's|/review → code-reviewer (with code-review-and-quality skill) → report|/webperf → web-performance-auditor agent → report|' "$src/references/orchestration-patterns.md"
 sed -i 's|Use alongside the `test-driven-development` skill\.|Use when writing tests ahead of implementation.|' "$src/references/testing-patterns.md"
 sed -i 's|If there is no `tasks/plan.md`, invoke planning-and-task-breakdown to generate one\.|If there is no `tasks/plan.md`, generate one: ordered, dependency-aware tasks with per-task acceptance criteria.|' "$src/.claude/commands/build.md"
 sed -i '/^Invoke the planning-and-task-breakdown skill\.$/{N;d;}' "$src/.claude/commands/plan.md"
-sed -i 's|5. \*\*Performance\*\* — No N+1 queries? No unbounded ops? (Use performance-optimization skill)|5. **Performance** — No N+1 queries? No unbounded ops?|' "$src/.claude/commands/review-gate.md"
 sed -i 's|9. Delegate granular optimization guidance and remediation steps to `skills/performance-optimization/SKILL.md` — keep this report at the audit level\.|9. Keep this report at the audit level — granular remediation steps belong in follow-up fix work, not in the audit.|' "$src/agents/web-performance-auditor.md"
 sed -i 's|Use it as the final gate in `planning-and-task-breakdown`, `incremental-implementation`, and `shipping-and-launch`\.|Use it as the final gate in planning, implementation, and `shipping-and-launch`.|' "$src/references/definition-of-done.md"
 sed -i 's| Use alongside the `performance-optimization` skill\.||' "$src/references/performance-checklist.md"
@@ -157,16 +162,20 @@ sed -i 's|- \*\*`planning-and-task-breakdown`\*\*: two hops downstream of this s
 scan=("$src/.claude/commands" "$src/references")
 for s in "${SKILLS[@]}"; do scan+=("$src/skills/$s"); done
 for a in "${AGENTS[@]}"; do scan+=("$src/agents/$a.md"); done
-dangling="$(grep -rlE 'test-driven-development|debugging-and-error-recovery|code-review-and-quality|performance-optimization|planning-and-task-breakdown|incremental-implementation|context-engineering' \
+dangling="$(grep -rlE 'test-driven-development|debugging-and-error-recovery|code-review-and-quality|performance-optimization|planning-and-task-breakdown|incremental-implementation|context-engineering|code-simplif|review-gate' \
   "${scan[@]}" || [ $? -eq 1 ])"
 if [ -n "$dangling" ]; then
-  echo "ERROR: dangling references to retired skills survived Mod 5 (upstream drift?):" >&2
+  echo "ERROR: dangling references to retired skills or commands survived Mod 5 (upstream drift?):" >&2
   echo "$dangling" >&2
   exit 1
 fi
 
 # Install.
 mkdir -p "$claude_dir/skills" "$claude_dir/commands" "$claude_dir/agents"
+# Copying never deletes, so remove what earlier installs of this recipe left
+# behind for the two commands and one skill retired 2026-10-13.
+rm -f "$claude_dir/commands/review-gate.md" "$claude_dir/commands/code-simplify.md"
+rm -rf "$claude_dir/skills/code-simplification"
 for s in "${SKILLS[@]}"; do
   rm -rf "$claude_dir/skills/$s"
   cp -r "$src/skills/$s" "$claude_dir/skills/$s"
@@ -204,5 +213,5 @@ for a in "${AGENTS[@]}"; do
 done
 
 echo
-echo "Installed ${#SKILLS[@]} skills, 8 commands, ${#AGENTS[@]} agents into $claude_dir"
+echo "Installed ${#SKILLS[@]} skills, $(ls "$src"/.claude/commands/*.md | wc -l) commands, ${#AGENTS[@]} agents into $claude_dir"
 echo "FULLY quit and relaunch Claude Code so new skills/commands appear in the / menu."

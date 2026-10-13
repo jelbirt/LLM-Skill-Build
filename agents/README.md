@@ -37,8 +37,6 @@ exists at any level to take precedence, and the references do not resolve.
 | Reference | Impact if missing |
 | :-------- | :---------------- |
 | `commands/ship.md` | Real — Phase A fans out to 3 personas, only `test-engineer` resolves |
-| `commands/code-simplify.md` | Real — trailing hand-off to `code-reviewer` |
-| `commands/review-gate.md` | None — self-contained five-axis review, zero references |
 | `skills/doubt-driven-development` | None — explicit fallback to a generic subagent |
 | `agents/test-engineer.md` | None — prose only |
 | `agents/web-performance-auditor.md` | None — explicitly does not invoke other personas |
@@ -57,6 +55,5 @@ Then any new machine is `git pull && scripts/install.sh --all --symlink`.
 **Before restoring them, consider whether they earn their keep.** This repo
 retired six upstream skills after A/B bake-offs showed identical outcomes
 against the bare model, and `scaffold-audit` exists to make exactly that call.
-`/review-gate` already delivers the five-axis review with no persona involved,
-and Claude Code ships built-in `/code-review` and `/security-review`. A bake-off
+Claude Code ships built-in `/code-review` and `/security-review`. A bake-off
 is more consistent with how this repo is maintained than restoring on reflex.
