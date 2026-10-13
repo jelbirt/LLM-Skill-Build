@@ -6,9 +6,9 @@
 # Upstream:  https://github.com/addyosmani/agent-skills  (MIT)
 # Pinned at: 70b7506ce90e200cb47645ddb3f6b8e84fecc047  (vendored 2026-07-07)
 #
-# Installs (15 files):
-#   - 7 skills   -> ~/.claude/skills/     (Define: interview-me, idea-refine,
-#     spec-driven-development · Build: doubt-driven-development · Verify:
+# Installs (14 files):
+#   - 6 skills   -> ~/.claude/skills/     (Define: interview-me, idea-refine ·
+#     Build: doubt-driven-development · Verify:
 #     browser-testing-with-devtools · Review: security-and-hardening ·
 #     Ship: shipping-and-launch)
 #
@@ -19,7 +19,7 @@
 #     code-review-and-quality, performance-optimization,
 #     planning-and-task-breakdown, incremental-implementation.
 #     security-and-hardening, tested the same way, measurably earned its keep
-#     and stays. Mod 5 rewrites all remaining upstream references to the six.
+#     and stays. Mod 5 rewrites all remaining upstream references to the retired skills.
 #   - 6 commands -> ~/.claude/commands/   (/spec /plan /build /test
 #     /webperf /ship)
 #
@@ -28,6 +28,12 @@
 #     installed (retired 2026-10-13):
 #     Claude Code now ships /code-review and /simplify for the same two jobs,
 #     and the pair would otherwise sit side by side in the skill list.
+#
+#     The spec-driven-development skill is also NOT installed (retired
+#     2026-10-13 after an Opus 5.5 bake-off tied: both arms caught all or all but one of 13
+#     planted traps, the skill arm at about 14% more tokens). /spec stays as a
+#     self-contained command: Mod 5 drops its pointer to the skill, and /build
+#     and the audit skills still route to it.
 #   - 2 personas -> ~/.claude/agents/     (test-engineer,
 #     web-performance-auditor). code-reviewer and security-auditor are
 #     deliberately NOT installed — user-level files of those names in
@@ -57,10 +63,10 @@
 #      skill folder — only the files that skill's SKILL.md actually cites —
 #      so `references/...` mentions resolve relative to the skill directory
 #      without tripling the footprint with never-loaded copies.
-#   5. Rewrite references to the six retired skills and the two retired
+#   5. Rewrite references to the retired skills and the two retired
 #      commands (see above), plus
 #      upstream's dangling `context-engineering` reference, wherever they
-#      remain — the commands, the three installed skills that cite them, the
+#      remain: the commands, the two installed skills that cite them, the
 #      shared reference checklists, and one agent persona — so nothing points
 #      at a skill that is not installed.
 #
@@ -83,7 +89,7 @@ UPSTREAM="https://github.com/addyosmani/agent-skills.git"
 PIN="70b7506ce90e200cb47645ddb3f6b8e84fecc047"
 
 SKILLS=(
-  interview-me idea-refine spec-driven-development
+  interview-me idea-refine
   doubt-driven-development
   browser-testing-with-devtools
   security-and-hardening
@@ -129,13 +135,17 @@ for a in "${OPUS_AGENTS[@]}"; do pin_model "$src/agents/$a.md" opus; done
 # /code-review and /simplify.
 rm "$src/.claude/commands/review.md" "$src/.claude/commands/code-simplify.md"
 
-# Mod 5: rewrite references to the six retired skills and the two retired
+# Mod 5: rewrite references to the retired skills and the two retired
 # commands so nothing installed points at something that no longer exists. The command bodies are already
 # self-contained workflows; these edits drop the invocation pointers and inline
 # the one piece of guidance that would otherwise be lost. (Also fixes
 # upstream's dangling `context-engineering` reference — that skill never
 # existed at the pin.)
 sed -i '/^Invoke the test-driven-development skill\.$/{N;d;}' "$src/.claude/commands/test.md"
+sed -i '/^Invoke the spec-driven-development skill\.$/{N;d;}' "$src/.claude/commands/spec.md"
+sed -i 's|`spec-driven-development` writes the requirements down|`/spec` writes the requirements down|' "$src/skills/interview-me/SKILL.md"
+sed -i 's|- \*\*`spec-driven-development`\*\*: downstream\. If the confirmed intent is concrete ("I want X for Y users with Z success criteria"), hand off to `spec-driven-development` to write it down\.|- **`/spec`**: downstream. If the confirmed intent is concrete ("I want X for Y users with Z success criteria"), hand off to `/spec` to write it down.|' "$src/skills/interview-me/SKILL.md"
+sed -i 's|(`idea-refine`, `spec-driven-development`)|(`idea-refine`, `/spec`)|' "$src/skills/interview-me/SKILL.md"
 sed -i '/^Invoke the incremental-implementation skill alongside test-driven-development\.$/{N;d;}' "$src/.claude/commands/build.md"
 sed -i "s|a test can't be made to pass or the build breaks without an obvious fix → follow debugging-and-error-recovery|a test can't be made to pass or the build breaks without an obvious fix → stop and debug to the root cause; never patch symptoms to keep moving|" "$src/.claude/commands/build.md"
 sed -i 's|If any step fails, follow the debugging-and-error-recovery skill\.|If any step fails, stop and debug to the root cause before continuing — reproduce the failure, isolate the cause, fix, and re-verify.|' "$src/.claude/commands/build.md"
@@ -151,9 +161,6 @@ sed -i '/^Invoke the planning-and-task-breakdown skill\.$/{N;d;}' "$src/.claude/
 sed -i 's|9. Delegate granular optimization guidance and remediation steps to `skills/performance-optimization/SKILL.md` — keep this report at the audit level\.|9. Keep this report at the audit level — granular remediation steps belong in follow-up fix work, not in the audit.|' "$src/agents/web-performance-auditor.md"
 sed -i 's|Use it as the final gate in `planning-and-task-breakdown`, `incremental-implementation`, and `shipping-and-launch`\.|Use it as the final gate in planning, implementation, and `shipping-and-launch`.|' "$src/references/definition-of-done.md"
 sed -i 's| Use alongside the `performance-optimization` skill\.||' "$src/references/performance-checklist.md"
-sed -i 's|> Follow `planning-and-task-breakdown` for the dependency-graph mapping and vertical-slicing mechanics behind these steps; it is the canonical source. The bullets above are a lightweight summary; if they ever diverge, `planning-and-task-breakdown` takes precedence\.|> The bullets above are the canonical mechanics for dependency-graph mapping and vertical slicing.|' "$src/skills/spec-driven-development/SKILL.md"
-sed -i 's|> Follow `planning-and-task-breakdown` for the full task-sizing and dependency-ordering mechanics; it is the canonical source. The template below is a lightweight inline form; if they ever diverge, `planning-and-task-breakdown` takes precedence\.|> The template below is the canonical form for task sizing and dependency ordering.|' "$src/skills/spec-driven-development/SKILL.md"
-sed -i 's|Execute tasks one at a time following `skills/incremental-implementation/SKILL.md` (`incremental-implementation`) and `skills/test-driven-development/SKILL.md` (`test-driven-development`)\. Use `skills/context-engineering/SKILL.md` (`context-engineering`) to load the right spec sections and source files at each step rather than flooding the agent with the entire spec\.|Execute tasks one at a time in small, verifiable increments, writing tests ahead of implementation (`/test`). Load only the spec sections and source files each step needs rather than flooding the agent with the entire spec.|' "$src/skills/spec-driven-development/SKILL.md"
 sed -i 's|- \*\*`planning-and-task-breakdown`\*\*: two hops downstream of this skill (after the spec)\.|- **`/plan`**: two hops downstream of this skill (after the spec).|' "$src/skills/interview-me/SKILL.md"
 
 # Guard: Mod 5's seds exit 0 even when nothing matches, so upstream drift
@@ -162,7 +169,7 @@ sed -i 's|- \*\*`planning-and-task-breakdown`\*\*: two hops downstream of this s
 scan=("$src/.claude/commands" "$src/references")
 for s in "${SKILLS[@]}"; do scan+=("$src/skills/$s"); done
 for a in "${AGENTS[@]}"; do scan+=("$src/agents/$a.md"); done
-dangling="$(grep -rlE 'test-driven-development|debugging-and-error-recovery|code-review-and-quality|performance-optimization|planning-and-task-breakdown|incremental-implementation|context-engineering|code-simplif|review-gate' \
+dangling="$(grep -rlE 'test-driven-development|debugging-and-error-recovery|code-review-and-quality|performance-optimization|planning-and-task-breakdown|incremental-implementation|context-engineering|code-simplif|review-gate|spec-driven-development' \
   "${scan[@]}" || [ $? -eq 1 ])"
 if [ -n "$dangling" ]; then
   echo "ERROR: dangling references to retired skills or commands survived Mod 5 (upstream drift?):" >&2
@@ -173,9 +180,9 @@ fi
 # Install.
 mkdir -p "$claude_dir/skills" "$claude_dir/commands" "$claude_dir/agents"
 # Copying never deletes, so remove what earlier installs of this recipe left
-# behind for the two commands and one skill retired 2026-10-13.
+# behind for the two commands and two skills retired 2026-10-13.
 rm -f "$claude_dir/commands/review-gate.md" "$claude_dir/commands/code-simplify.md"
-rm -rf "$claude_dir/skills/code-simplification"
+rm -rf "$claude_dir/skills/code-simplification" "$claude_dir/skills/spec-driven-development"
 for s in "${SKILLS[@]}"; do
   rm -rf "$claude_dir/skills/$s"
   cp -r "$src/skills/$s" "$claude_dir/skills/$s"
