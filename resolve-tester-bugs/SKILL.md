@@ -192,17 +192,20 @@ Stop and wait for approval.
    - the standing rules: no em dash character anywhere, no AI attribution in
      commits or PR bodies, and the repo `CLAUDE.md` constraints in play;
    - the PR body follows the repo template, decisions first, then mechanics;
-   - open the PR and stop: never merge, never deploy;
-   - return the PR URL, the commits, and the test and check results.
+   - commit on the lane branch and stop: do not push or open the PR, never
+     merge, never deploy;
+   - return the branch, the commits, and the test and check results.
 5. **Sequential lanes** wait until the owner reports their predecessor merged.
    Stop, report the open PRs, and resume from fresh main when told.
 6. **Check every claim** a subagent returns: read the diff, rerun the green
    bar in its worktree, and confirm in the browser that the original repro
    now passes.
-7. **One review pass per PR**, after it opens: a fresh `code-reviewer`
-   subagent if one is installed, otherwise a general-purpose subagent briefed
-   to review the full PR diff (`model: "opus"` either way). Fix confirmed
-   findings in follow-up commits, and note in the PR any declined and why.
+7. **One review pass per PR**, as the last step before pushing: a fresh
+   `code-reviewer` subagent if one is installed, otherwise a general-purpose
+   subagent briefed to review the full branch diff against main
+   (`model: "opus"` either way). Fix confirmed findings in follow-up
+   commits, rerun the green bar, then push and open the PR, noting in it any
+   finding declined and why.
 8. This session alone writes the board, and does not touch it while lanes
    run. Stop at gates, merges, deploys, and any problem that changes the
    plan's shape.
