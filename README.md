@@ -32,6 +32,8 @@ A small, curated set of focused [Agent Skills](https://agentskills.io) for Claud
 | [`scaffold-audit`](scaffold-audit/) | Periodic re-audit of your entire Claude Code config — full inventory (skills, commands, agents, hooks, permissions, pins), decay triage, ground-truth A/B bake-offs, verified prune with git rollback. Makes the periodic delete-your-scaffolding ritual urged by Boris Cherny repeatable and evidence-based. | `cp -r scaffold-audit ~/.claude/skills/` |
 | [`resolve-tester-bugs`](resolve-tester-bugs/) | Take a pasted round of tester feedback to open PRs: browser-verify every item against main and the deployed build, recommend fixes, stop for owner decisions, then plan and run lanes as PRs, in parallel where they touch different files. | `cp -r resolve-tester-bugs ~/.claude/skills/` |
 | [`repo-issue-scout`](repo-issue-scout/) | Scout an open source repo for issues worth contributing to: check that outsiders can open PRs, learn the repo's bar from its guides and your merged PRs, drop claimed, linked or already-fixed issues, verify survivors on the default branch with file:line, and return a ranked shortlist. Research only. | `cp -r repo-issue-scout ~/.claude/skills/` |
+| [`manager`](manager/) | Run a session as a project's Manager: keep a private ledger (in the repo, but never committed or pushed) of your open asks, decisions and workstreams, start one worker session per workstream, hold every PR to a fixed bar (green checks, integration review rounds that stop when fixes start going in circles), and hand you one short review packet per PR. Uses the [`integration-reviewer`](agents/integration-reviewer.md) persona. Needs the Claude desktop app. | `scripts/install.sh manager integration-reviewer` |
+| [`ask`](ask/) | Turn a new session into a project's read-only Ask session for side questions, so your working sessions stay focused. Ships the `Ask` output style, which `scripts/install.sh` installs. Needs the Claude desktop app. | `scripts/install.sh ask` |
 
 <!-- As skills ship, add a row: | [`name`](name/) | one line | `cp -r name ~/.claude/skills/` | -->
 
@@ -53,8 +55,9 @@ scripts/install.sh --skills           # skills only
 scripts/install.sh --agents           # personas only
 ```
 
-Skills land in `~/.claude/skills/`, personas in `~/.claude/agents/`. Override
-either with `CLAUDE_SKILLS_DIR` / `CLAUDE_AGENTS_DIR`. To scope a skill to one
+Skills land in `~/.claude/skills/`, personas in `~/.claude/agents/`, and any output
+style a skill ships (in its `output-styles/` folder) in `~/.claude/output-styles/`. Override
+them with `CLAUDE_SKILLS_DIR` / `CLAUDE_AGENTS_DIR` / `CLAUDE_OUTPUT_STYLES_DIR`. To scope a skill to one
 project instead, copy the folder into that repo's `.claude/skills/`.
 
 Then **fully quit and relaunch Claude Code** — new skills only enter the `/` menu

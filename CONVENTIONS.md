@@ -5,7 +5,8 @@ How skills in this repo are written. Kept short on purpose.
 ## Layout
 
 - One skill per folder. Folder name is **kebab-case** and becomes the `/command` name.
-- Only `SKILL.md` is required. Optional: `scripts/`, `references/`, `assets/`.
+- Only `SKILL.md` is required. Optional: `scripts/`, `references/`, `assets/`, and
+  `output-styles/` (installed into `~/.claude/output-styles/` by `scripts/install.sh`).
 - Start from [`_template/SKILL.md`](_template/SKILL.md) (or run `/new-skill`).
 
 ## Frontmatter
@@ -34,6 +35,7 @@ Skills that name a tier for the agents they dispatch:
 - `flowchart` - `opus`; one exploration dispatch per request.
 - `audit-fix` - `opus`; fans out one agent per file group, so the tier multiplies.
 - `next-steps` - `sonnet`; bounded, frequent status review, cheapness is the point.
+- `manager` - `opus`; the integration reviewer's verdict decides whether a PR reaches the user.
 
 The same reasoning applies to persona definitions in `~/.claude/agents/` (outside this repo): an agent file with no `model:` key inherits on every invocation, so the high-frequency reviewers there name a tier as well.
 

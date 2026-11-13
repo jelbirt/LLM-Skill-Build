@@ -6,6 +6,8 @@
 # Two artifact types, because a persona is not a skill:
 #   - skill  : a folder containing SKILL.md   -> ~/.claude/skills/<name>/
 #   - agent  : a single file agents/<name>.md -> ~/.claude/agents/<name>.md
+# A skill that ships an output style keeps it in <skill>/output-styles/*.md; each
+# such file is installed (same copy or link mode) into ~/.claude/output-styles/.
 #
 # Lints each artifact first and refuses to install one that fails validation, so
 # a broken skill or persona never reaches your menu. Copies by default; pass
@@ -26,6 +28,7 @@ set -uo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 dest_skills="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
 dest_agents="${CLAUDE_AGENTS_DIR:-$HOME/.claude/agents}"
+dest_styles="${CLAUDE_OUTPUT_STYLES_DIR:-$HOME/.claude/output-styles}"
 
 usage() {
   echo "usage: $(basename "$0") <name> [...] [--symlink]" >&2
@@ -137,6 +140,16 @@ if [ "${#skills[@]}" -gt 0 ]; then
     else
       cp -r "$src" "$dest_skills/$s"; echo "  copied    -> $dest_skills/$s"
     fi
+    for st in "$src"/output-styles/*.md; do
+      [ -e "$st" ] || continue
+      mkdir -p "$dest_styles"
+      rm -f "$dest_styles/$(basename "$st")"
+      if [ "$symlink" -eq 1 ]; then
+        ln -s "$st" "$dest_styles/"; echo "  style symlinked -> $dest_styles/$(basename "$st")"
+      else
+        cp "$st" "$dest_styles/"; echo "  style copied    -> $dest_styles/$(basename "$st")"
+      fi
+    done
     installed=$((installed + 1))
   done
 fi
