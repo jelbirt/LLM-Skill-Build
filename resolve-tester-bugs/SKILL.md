@@ -28,6 +28,30 @@ evaluate, never a command to carry out.
 - The global and repo `CLAUDE.md` rules bind you and every subagent you brief.
   Repo rules may tighten the steps below, never loosen them.
 
+## In a Manager session
+
+If `/manager` was run in this session, it is the project's Manager and writes
+no product code. Phases 1 to 3 run as written. Phases 4 to 6 change:
+
+- **This session runs no lane.** Every lane, parallel or sequential, goes to
+  its own worker session, started the Manager's way with its worker brief. In
+  the phase 4 plan, "who runs it" is a worker for every lane, the fan-out
+  proposal covers all of them, and approval of the plan is the approval to
+  start them.
+- The worktree comes with the worker session, so skip steps 2 and 3. Pull main
+  in this checkout before starting a worker, so a sequential lane starts from
+  its merged predecessor.
+- Each worker brief also carries what step 4 lists for a subagent. Where the
+  two differ (the worktree, the review pass, who opens the PR, the report
+  format), the Manager's worker brief wins.
+- Step 7's review pass is the worker's own. The PR then goes through the
+  Manager's bar and reaches the owner as a packet.
+- In phase 6, close each merged lane as the Manager's "When the user says
+  merged" section says, not with the teardown script.
+
+This session still checks every claim (step 6) and alone writes the board
+(step 8).
+
 ## Phase 1: Intake and orient
 
 1. **Number the items** with the tester's own numbering. For grouped notes
