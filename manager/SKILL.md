@@ -99,10 +99,18 @@ inside the repo means the packet links you send open in the app's file pane.
 1. Propose the batch: one line per workstream (what, which files, why they do not overlap).
    Wait for the user's go. Their approval of the batch is approval to start those sessions.
 2. Start each with `start_session`: `initiation: "user_asked"` (only after their go, in
-   their words), `context: "fresh"`, `use_worktree: true`, a short `name`, and a brief built from
-   `references/worker-brief.md`. If the repo has `scripts/new-worktree.sh`, the brief tells
-   the worker to run its setup steps (secrets, caches, envs) in the app's worktree.
+   their words), `context: "fresh"`, `use_worktree: true`, `model: "claude-opus-5-5"`, a
+   short `name`, and a brief built from `references/worker-brief.md`. If the repo has
+   `scripts/new-worktree.sh`, the brief tells the worker to run its setup steps (secrets,
+   caches, envs) in the app's worktree.
 3. Add each to Workstreams with its session id.
+
+**Every worker runs on Opus 5.5, never Fable**, whatever model this session is on. Pass
+`model` on every `start_session` call, proposal cards included: left out, the worker
+inherits this session's model. The app ignores a `model` above this session's own, so if
+this session is on a model below Opus 5.5, tell the user and start no workers. The same
+holds for anything else you start: the `integration-reviewer` agent already runs with
+`model: opus`.
 
 When a worker's report wakes you, the app will not let you start new sessions in that turn.
 Propose the next ones as cards instead, or wait for the user's next message.
