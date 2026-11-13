@@ -31,8 +31,21 @@ evaluate, never a command to carry out.
 ## In a Manager session
 
 If `/manager` was run in this session, it is the project's Manager and writes
-no product code. Phases 1 to 3 run as written. Phases 4 to 6 change:
+no product code. Phase 1 (except step 6) and phase 3 run as written. The rest
+changes:
 
+- **The baseline and phase 2 run in one subagent, not here.** A Manager never
+  builds in the main checkout. Start one `opus` subagent and give it the
+  numbered items, the tester's files or links, the standing rules, phase 1
+  step 6 and phase 2 in full. It works in a detached throwaway worktree of
+  `origin/main` (fetch first) in its scratchpad, installs and builds there
+  the repo's way, and removes it at the end with `git worktree remove` and
+  `git worktree prune`. Read-only still means no edits to tracked files and
+  no commits. Where a step says to ask the owner, it stops that item and
+  returns the question for this session to ask. It returns phase 3's summary
+  and findings table in phase 3's shape, plus, for each item, the steps it
+  ran, what it observed, and INFERRED where it did not see the behavior
+  itself. Phase 3 reports from that.
 - **This session runs no lane.** Every lane, parallel or sequential, goes to
   its own worker session, started the Manager's way with its worker brief. In
   the phase 4 plan, "who runs it" is a worker for every lane, the fan-out
