@@ -26,12 +26,16 @@ commit and check its exit code. Before pushing, run one review pass on the full 
 commits. Then push and open the PR. Commits and the PR body: decisions first, no Claude or
 tool attribution lines, no em dashes, and never quote this brief's DECIDED ALREADY or NAMES
 text; describe the change in your own words.
+WAITING: never poll with `pgrep`. Run a check in the foreground, or with the Bash tool's
+background option, which wakes you when it exits. To wait on a process you did not start,
+use its PID: `while kill -0 "$pid" 2>/dev/null; do sleep 10; done`.
 
 EVERY REPORT starts with this line, then at most five lines:
-STATUS: <ready | question | blocked | failed> | <PR #n or branch> | <one plain sentence>
+STATUS: <ready | waiting | question | blocked | failed> | <PR #n or branch> | <one plain sentence>
 - ready: PR open, checks green; list each claim of "checked" or "verified" with its command
   and result.
 - question: one numbered question with your recommendation.
+- waiting: the command you are waiting on and its PID.
 - blocked / failed: what stopped you and what you tried.
 After review fixes, one line per finding: fixed: <finding> in <sha>.
 Never coin a term; if you must name something new, define it in the same line.

@@ -121,6 +121,24 @@ Workers begin every report with one status line (see the brief). You only see th
 400 characters, so when the status is not `ready` or you need detail, read the worker's
 transcript with `list_events`. Ask a worker for something with `SendMessage` to its id.
 
+## Watching workers
+
+A worker can end its turn waiting on a background run that never finishes. The app wakes
+you only when a turn ends, so nothing tells you it is stuck. Check for it yourself:
+
+- On every report with status `waiting`, or any report that says it is waiting, check what
+  it waits on now: `ps` for the process (its age and command), the worktree's `git log` and
+  `git status`, and the transcript's last lines.
+- While any worker or background agent of yours has unfinished work, schedule a check every
+  15 to 20 minutes (`ScheduleWakeup`) and repeat those checks for each one. Stop scheduling
+  when none has.
+- Stuck means idle and waiting on a loop that cannot end (a `pgrep -f` loop whose pattern
+  appears in its own command line matches itself), on a process that has run far longer
+  than that command normally takes, or on nothing at all.
+- A stuck worker gets a `SendMessage` with the cause and the next step (stop the process,
+  run the command now). A stuck background agent of your own: stop it and start it again.
+- When one is stuck, tell the user in one line what it was and what you did.
+
 ## The bar before a PR reaches the user
 
 All of these, in order, on one head commit. A PR that fails one goes back to its worker with
