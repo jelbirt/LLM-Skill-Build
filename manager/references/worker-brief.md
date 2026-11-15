@@ -26,6 +26,14 @@ commit and check its exit code. Before pushing, run one review pass on the full 
 commits. Then push and open the PR. Commits and the PR body: decisions first, no Claude or
 tool attribution lines, no em dashes, and never quote this brief's DECIDED ALREADY or NAMES
 text; describe the change in your own words.
+CHECKS: run the check command and any browser suite bare, so the exit code you read is its
+own: nothing after it such as `; echo $?`, `| tail` or `|| true`. A timeout in a file you
+did not touch is still a failure. Run the whole check command once more and say so in your
+report. If it fails again, fix it or send the Manager a `blocked` report.
+LOCK: put `flock -o <lock file>` in front of every check and browser suite command, so runs
+from different sessions wait in line instead of overloading the machine. flock returns the
+command's own exit code. Run them with the Bash tool's background option, since the wait
+can outlast a foreground run.
 WAITING: never poll with `pgrep`. Run a check in the foreground, or with the Bash tool's
 background option, which wakes you when it exits. To wait on a process you did not start,
 use its PID: `while kill -0 "$pid" 2>/dev/null; do sleep 10; done`.

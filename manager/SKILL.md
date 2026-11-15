@@ -102,7 +102,8 @@ inside the repo means the packet links you send open in the app's file pane.
    their words), `context: "fresh"`, `use_worktree: true`, `model: "claude-opus-5-5"`, a
    short `name`, and a brief built from `references/worker-brief.md`. If the repo has
    `scripts/new-worktree.sh`, the brief tells the worker to run its setup steps (secrets,
-   caches, envs) in the app's worktree.
+   caches, envs) in the app's worktree. Every brief names one lock file for the repo on
+   its LOCK line (for example `/tmp/{repo}-checks.lock`).
 3. Add each to Workstreams with its session id.
 
 **Every worker runs on Opus 5.5, never Fable**, whatever model this session is on. Pass
@@ -134,7 +135,9 @@ you only when a turn ends, so nothing tells you it is stuck. Check for it yourse
   when none has.
 - Stuck means idle and waiting on a loop that cannot end (a `pgrep -f` loop whose pattern
   appears in its own command line matches itself), on a process that has run far longer
-  than that command normally takes, or on nothing at all.
+  than that command normally takes, or on nothing at all. A `flock` waiting on the repo's
+  lock file while another run holds it is queued, not stuck (`lslocks` shows which PID
+  holds it).
 - A stuck worker gets a `SendMessage` with the cause and the next step (stop the process,
   run the command now). A stuck background agent of your own: stop it and start it again.
 - When one is stuck, tell the user in one line what it was and what you did.
@@ -172,7 +175,8 @@ link, and log the PR in the PR log with the head SHA in the packet.
   repo path, the PR numbers in play (this one plus any open ones it touches), the round
   number, the PR's verification claims, the PR's worktree path (from `git worktree list`),
   and that PR's rows from Review rounds. Subagents do not inherit CLAUDE.md or memory, so
-  include: no em dashes, no attribution, the repo's check command, the binding repo and
+  include: no em dashes, no attribution, the repo's check command with the same
+  `flock -o {lock file}` prefix the workers use, the binding repo and
   memory rules, and that it must not edit, commit or push.
 - Write each finding to Review rounds with the head SHA reviewed. Send critical and
   important ones to the worker; its report gives `fixed: {finding} in {sha}` for each,
