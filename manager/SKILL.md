@@ -102,8 +102,9 @@ inside the repo means the packet links you send open in the app's file pane.
    their words), `context: "fresh"`, `use_worktree: true`, `model: "claude-opus-5-5"`, a
    short `name`, and a brief built from `references/worker-brief.md`. If the repo has
    `scripts/new-worktree.sh`, the brief tells the worker to run its setup steps (secrets,
-   caches, envs) in the app's worktree. Every brief names one lock file for the repo on
-   its LOCK line (for example `/tmp/{repo}-checks.lock`).
+   caches, envs) in the app's worktree. Every brief's LOCK line names
+   `/tmp/{repo}-checks.lock`, where {repo} is the main checkout's directory name, so
+   every session on the repo shares one lock.
 3. Add each to Workstreams with its session id.
 
 **Every worker runs on Opus 5.5, never Fable**, whatever model this session is on. Pass

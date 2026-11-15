@@ -32,8 +32,9 @@ did not touch is still a failure. Run the whole check command once more and say 
 report. If it fails again, fix it or send the Manager a `blocked` report.
 LOCK: put `flock -o <lock file>` in front of every check and browser suite command, so runs
 from different sessions wait in line instead of overloading the machine. flock returns the
-command's own exit code. Run them with the Bash tool's background option, since the wait
-can outlast a foreground run.
+command's own exit code. A check of several commands goes in one `sh -c '...'` after the
+lock. Run them with the Bash tool's background option, since the wait can outlast a
+foreground run.
 WAITING: never poll with `pgrep`. Run a check in the foreground, or with the Bash tool's
 background option, which wakes you when it exits. To wait on a process you did not start,
 use its PID: `while kill -0 "$pid" 2>/dev/null; do sleep 10; done`.

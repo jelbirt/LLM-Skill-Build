@@ -37,7 +37,8 @@ changes:
 - **The baseline and phase 2 run in one subagent, not here.** A Manager never
   builds in the main checkout. Start one `opus` subagent and give it the
   numbered items, the tester's files or links, the standing rules, phase 1
-  step 6 and phase 2 in full. It works in a detached throwaway worktree of
+  step 6 and phase 2 in full, with step 6's runs under the repo's lock
+  (phase 5 step 2). It works in a detached throwaway worktree of
   `origin/main` (fetch first) in its scratchpad, installs and builds there
   the repo's way, and removes it at the end with `git worktree remove` and
   `git worktree prune`. Read-only still means no edits to tracked files and
@@ -188,7 +189,14 @@ Stop and wait for approval.
    (check `git log` on that file); if that is unclear, ask. If the repo has no
    lane board, create none.
 2. Create each lane's worktree with the repo's script when that lane starts,
-   from current main.
+   from current main. From here on, every green-bar and e2e run, by this
+   session or any subagent (review subagents included), runs bare and under
+   the repo's lock: `flock -o /tmp/{repo}-checks.lock {command}`, where
+   {repo} is the main checkout's directory name, so every session on the
+   repo waits in line instead of overloading the machine. Bare means
+   nothing after it such as `; echo $?`, `| tail` or `|| true`, so the
+   exit code read is the command's own; flock returns it. A green bar of
+   several commands goes in one `sh -c '...'` after the lock.
 3. **Lanes this session runs:** work them directly to the same bar as below.
 4. **Lanes for subagents:** launch approved parallel lanes together, in the
    background, each with `model: "opus"`. Each brief is self-contained and
@@ -202,6 +210,11 @@ Stop and wait for approval.
    - that it leaves the browser check to this session;
    - a failing test first, then the fix; the green bar before every commit;
      the e2e suite before the PR;
+   - step 2's rule for check runs: bare, under the lock, with the Bash
+     tool's background option, which wakes it when the command exits
+     (never `cmd &`, and never poll with `pgrep`). A timeout in a file it
+     did not touch is still a failure: rerun the whole command once and say
+     so in its results; if it fails again, fix it or report it blocked;
    - the standing rules: no em dash character anywhere, no AI attribution in
      commits or PR bodies, and the repo `CLAUDE.md` constraints in play;
    - the PR body follows the repo template, decisions first, then mechanics;
